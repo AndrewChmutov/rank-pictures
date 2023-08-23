@@ -1,9 +1,6 @@
 #include "screen.hpp"
 
 #include <SDL2/SDL_image.h>
-#include <SDL_events.h>
-#include <SDL_render.h>
-#include <SDL_video.h>
 
 Screen::Screen(std::size_t width, std::size_t height) {
     // Initialize different subsystems
@@ -78,7 +75,30 @@ void Screen::putBackground(uint8_t r, uint8_t g, uint8_t b, uint8_t opacity) {
 
 
 void Screen::show() {
+    for (const auto& image : images)
+        SDL_RenderCopy(renderer, image.texture, NULL, &image.rect);
+
     SDL_RenderPresent(renderer);
+}
+
+
+void Screen::putPictureFrame(int x, int y, int w, int h, std::string path) {
+    SDL_Surface* pictureSurface = IMG_Load(path.c_str());
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, pictureSurface);
+    SDL_FreeSurface(pictureSurface);
+
+    images.push_back( Image {
+        SDL_Rect{x, y, w, h}, 
+        texture
+    });
+}
+
+
+void Screen::clearPictures() {
+    for (auto& image : images)
+        SDL_DestroyTexture(image.texture);
+
+    images.clear();
 }
 
 
