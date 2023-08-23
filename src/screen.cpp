@@ -1,6 +1,8 @@
 #include "screen.hpp"
 
 #include <SDL2/SDL_image.h>
+#include <SDL_render.h>
+#include <SDL_video.h>
 
 Screen::Screen(std::size_t width, std::size_t height) {
     // Initialize different subsystems
@@ -55,6 +57,12 @@ SDL_EventType Screen::input() {
                     std::size_t newWidth = event.window.data1;
                     std::size_t newHeight = event.window.data2;
                     SDL_RenderSetLogicalSize(renderer, newWidth, newHeight);
+                }
+                else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED) {
+                    SDL_MaximizeWindow(window);
+                    int w, h;
+                    SDL_GetWindowSize(window, &w, &h);
+                    SDL_RenderSetLogicalSize(renderer, w, h);
                 }
                 break;
         }
