@@ -1,6 +1,9 @@
 #include "screen.hpp"
 
 #include <SDL2/SDL_image.h>
+#include <SDL_events.h>
+#include <SDL_render.h>
+#include <SDL_video.h>
 
 Screen::Screen(std::size_t width, std::size_t height) {
     // Initialize different subsystems
@@ -20,15 +23,20 @@ Screen::Screen(std::size_t width, std::size_t height) {
     }
 
     // Initialize window and renderer
-    SDL_CreateWindowAndRenderer(
+    window = SDL_CreateWindow(
+        "Picture ranking", 
+        SDL_WINDOWPOS_UNDEFINED, 
+        SDL_WINDOWPOS_UNDEFINED, 
         width, 
         height, 
-        SDL_WINDOW_OPENGL, 
-        &window,
-        &renderer
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
 
-    SDL_SetWindowTitle(window, "Picture ranking");
+    renderer = SDL_CreateRenderer(
+        window, 
+        -1,
+        SDL_RENDERER_ACCELERATED
+    );
 }
 
 
@@ -37,10 +45,22 @@ SDL_EventType Screen::input() {
 
     // Handle events
     while(SDL_PollEvent(&event)) {
-        // Close window button or ESC key
-        if (event.type == SDL_QUIT ||
-            (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE))
-            return SDL_QUIT;
+        switch (event.type) {
+            // Close window button or ESC key
+            case SDL_QUIT:
+                return SDL_QUIT;
+            case SDL_KEYDOWN:
+                if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                    return SDL_QUIT;
+            
+            case SDL_WINDOWEVENT:
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    std::size_t newWidth = event.window.data1;
+                    std::size_t newHeight = event.window.data2;
+                    SDL_RenderSetLogicalSize(renderer, newWidth, newHeight);
+                }
+                break;
+        }
     }
 
     // Default case
