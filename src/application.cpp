@@ -3,12 +3,17 @@
 #include <exception>
 #include <memory>
 #include "main_menu.hpp"
+#include <filesystem>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
-    screen(w, h, "Picture ranking", pathToFont),
+    screen(w, h, "Picture ranking"),
     pathToPictures(pathToPictures),
-    currentMenu(std::make_unique<MainMenu>()){}
+    pathToFont(pathToFont),
+    gen(std::random_device()()){
+
+    switchToMain();
+}
 
 int Application::run() {
     isRunning = true;
@@ -33,9 +38,23 @@ void Application::update() {
             break;
 
         case MenuEvent::TO_MAIN_SCREEN:
-            currentMenu = std::make_unique<MainMenu>();
+            switchToMain();
 
         case MenuEvent::TO_RATING_SCREEN:
-        break;
+        case MenuEvent::NONE:
+            break;
     }
+
+    currentMenu.get()->update(screen);
+    currentMenu.get()->render(screen);
+}
+
+
+void Application::switchToMain() {
+    currentMenu = std::make_unique<MainMenu>(
+        screen,
+        pathToFont,
+        "kek.jpg",
+        "kek2.jpg"
+    );
 }

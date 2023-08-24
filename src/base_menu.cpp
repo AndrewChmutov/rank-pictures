@@ -36,8 +36,8 @@ MenuEvent BaseMenu::handleEvents(Screen& screen) {
 }
 
 
-void BaseMenu::render() {}
+void BaseMenu::render(Screen& screen) {}
 
-void BaseMenu::update() {}
+void BaseMenu::update(const Screen& screen) {}
 
-void BaseMenu::resize() {}
+void BaseMenu::resize(Screen& screen) {}

@@ -10,11 +10,11 @@ public:
 
     virtual void handleSpecificEvent(const SDL_Event& event, Screen& screen) = 0;
 
-    virtual void render();
+    virtual void render(Screen& screen);
 
-    virtual void update();
+    virtual void update(const Screen& screen);
 
-    virtual void resize();
+    virtual void resize(Screen& screen);
 
     virtual ~BaseMenu() = default;
 
