@@ -10,7 +10,7 @@ int main() {
         1280,
         720,
         "cars",
-        "fonts/Raleway-Regular.ttf"
+        "fonts/MONOFONT.TTF"
     );
 
     return app.run();

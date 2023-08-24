@@ -95,6 +95,14 @@ void Screen::putTexturedRect(int x, int y, int w, int h, SDL_Texture* texture) {
 }
 
 
+void Screen::putLine(int x1, int y1, int x2, int y2, 
+                uint8_t r, uint8_t g, 
+                uint8_t b, uint8_t opacity) {
+    SDL_SetRenderDrawColor(renderer, r, g, b, opacity);
+    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+}
+
+
 Screen::~Screen() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

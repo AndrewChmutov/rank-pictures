@@ -9,7 +9,7 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
         rectLeft({0, 0, 0, 0}), 
         rectRight({0, 0, 0, 0}),
         fontSize(20){
-    font = TTF_OpenFont(pathToFont.c_str(), 400);
+    font = TTF_OpenFont(pathToFont.c_str(), 200);
 
     if (font == NULL) {
         fprintf(stderr, "%s\n", "Could not initialize font!");
@@ -50,6 +50,10 @@ void MainMenu::update(const Screen& screen) {
     rectLabel.y = 10;
     rectLabel.x = windowX / 2 - rectLabel.w / 2;
 
+    lineX1 = lineX2 = windowX / 2;
+
+    lineY1 = rectLabel.y + rectLabel.h + 10;
+    lineY2 = windowY - 10;
 }
 
 
@@ -62,6 +66,9 @@ void MainMenu::render(Screen& screen) {
         rectLabel.h,
         textureLabel
     );
+
+    screen.putLine(lineX1, lineY1, lineX2, lineY2, 128, 128, 128);
+
     screen.show();
 }
 

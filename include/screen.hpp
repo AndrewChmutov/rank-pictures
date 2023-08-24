@@ -29,6 +29,10 @@ public:
 
     void putTexturedRect(int x, int y, int w, int h, SDL_Texture* texture);
 
+    void putLine(int x1, int y1, int x2, int y2, 
+                uint8_t r = 255, uint8_t g= 255, 
+                uint8_t b = 255, uint8_t opacity = 255);
+
     void clear();
 
     void show();
