@@ -9,6 +9,7 @@ int main() {
     Screen screen(1280, 720);
     // ./cars/002b243a2b98c0012415693225b8efbf.jpg
     screen.putPictureFrame(0, 0, 720, 720, "kek.jpg");
+    screen.putLabelFrame(720, 0, 200, 40, "Kek it was", 0, 0, 0);
 
     while (true) {
         SDL_EventType input_result = screen.input();

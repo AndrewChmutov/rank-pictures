@@ -2,7 +2,9 @@
 
 #include <SDL2/SDL_image.h>
 #include <SDL_render.h>
-#include <SDL_video.h>
+#include <SDL_surface.h>
+#include <SDL_ttf.h>
+#include <cstdlib>
 
 Screen::Screen(std::size_t width, std::size_t height) {
     // Initialize different subsystems
@@ -21,6 +23,11 @@ Screen::Screen(std::size_t width, std::size_t height) {
         exit(EXIT_FAILURE);
     }
 
+    if (TTF_Init() == -1) {
+        fprintf(stderr, "%s\n", "Could not initialize TTF!");
+        exit(EXIT_FAILURE);
+    }
+
     // Initialize window and renderer
     window = SDL_CreateWindow(
         "Picture ranking", 
@@ -36,6 +43,13 @@ Screen::Screen(std::size_t width, std::size_t height) {
         -1,
         SDL_RENDERER_ACCELERATED
     );
+
+    font = TTF_OpenFont("fonts/Raleway-Regular.ttf", 400);
+
+    if (font == NULL) {
+        fprintf(stderr, "%s\n", "Could not initialize font!");
+        exit(EXIT_FAILURE);
+    }
 }
 
 
@@ -85,6 +99,9 @@ void Screen::putBackground(uint8_t r, uint8_t g, uint8_t b, uint8_t opacity) {
 void Screen::show() {
     for (const auto& image : images)
         SDL_RenderCopy(renderer, image.texture, NULL, &image.rect);
+    
+    for (const auto& label : labels)
+        SDL_RenderCopy(renderer, label.texture, NULL, &label.rect);
 
     SDL_RenderPresent(renderer);
 }
@@ -95,16 +112,32 @@ void Screen::putPictureFrame(int x, int y, int w, int h, std::string path) {
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, pictureSurface);
     SDL_FreeSurface(pictureSurface);
 
-    images.push_back( Image {
+    images.push_back( EntityTexture {
         SDL_Rect{x, y, w, h}, 
         texture
     });
 }
 
 
-void Screen::clearPictures() {
+void Screen::putLabelFrame(int x, int y, int w, int h, std::string text, 
+                            uint8_t r, uint8_t g, uint8_t b, uint8_t opacity) {
+    SDL_Surface* labelSurface = TTF_RenderText_Solid(font, text.c_str(), SDL_Color{r, g, b, opacity});
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, labelSurface);
+    SDL_FreeSurface(labelSurface);
+
+    labels.push_back( EntityTexture {
+        SDL_Rect{x, y, w, h},
+        texture
+    });
+}
+
+
+void Screen::clear() {
     for (auto& image : images)
         SDL_DestroyTexture(image.texture);
+
+    for (auto& label : labels)
+        SDL_DestroyTexture(label.texture);
 
     images.clear();
 }
@@ -114,6 +147,7 @@ Screen::~Screen() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
