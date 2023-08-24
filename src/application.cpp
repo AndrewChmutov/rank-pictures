@@ -54,7 +54,7 @@ void Application::switchToMain() {
     currentMenu = std::make_unique<MainMenu>(
         screen,
         pathToFont,
-        "kek.jpg",
+        "keker.jpg",
         "kek2.jpg"
     );
 }

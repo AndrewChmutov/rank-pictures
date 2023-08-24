@@ -48,6 +48,9 @@ void MainMenu::update(const Screen& screen) {
     int windowX, windowY;
     screen.getSize(windowX, windowY);
 
+    boxW = static_cast<int>(500.0f / 1280 * windowX); 
+    boxH = static_cast<int>(500.0f / 720 * windowY); 
+
     rectLabel.w = fontSize * text.size();
     rectLabel.h = 2.4 * fontSize;
 
@@ -80,6 +83,27 @@ void MainMenu::update(const Screen& screen) {
         rectLeft.y = windowY / 2 - boxH / 2;
         rectLeft.x = windowX / 2 - 60 - boxW + (boxW / 2 - rectLeft.w / 2);
     }
+
+
+    SDL_QueryTexture(textureRight, NULL, NULL, &imgX, &imgY);
+
+    ratio = 1.0f * imgX / imgY;
+    ratioBox = 1.0f * boxW / boxH;
+
+    if (ratio > ratioBox) {
+        rectRight.w = boxW;
+        rectRight.h = 1.0f * boxW / ratio;
+    
+        rectRight.x = windowX / 2 + 60;
+        rectRight.y = windowY / 2 - rectRight.h / 2;
+    }
+    else {
+        rectRight.h = boxH;
+        rectRight.w = ratio * boxH;
+
+        rectRight.y = windowY / 2 - boxH / 2;
+        rectRight.x = windowX / 2 + 60;
+    }
 }
 
 
@@ -94,6 +118,7 @@ void MainMenu::render(Screen& screen) {
     );
 
     screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
+    screen.putTexturedRect(rectRight.x, rectRight.y, rectRight.w, rectRight.h, textureRight);
 
     screen.putLine(lineX1, lineY1, lineX2, lineY2, 128, 128, 128);
 
