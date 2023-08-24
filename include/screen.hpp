@@ -1,6 +1,7 @@
 #pragma once
 
 // C++ standard libraries
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -23,9 +24,11 @@ class Screen {
     std::vector<EntityTexture> labels;
 
 public:
-    Screen(std::size_t width, std::size_t height);
+    Screen(int width, int height, std::string windowName, std::string pathToFont);
 
-    SDL_EventType input();
+    void resize(int newWidth, int newHeight);
+
+    void maximize(int& w, int& h);
 
     void putBackground(uint8_t r = 255, uint8_t g = 255, uint8_t b = 255, uint8_t opacity = 255);
 

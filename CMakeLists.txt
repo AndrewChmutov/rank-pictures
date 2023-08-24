@@ -18,6 +18,9 @@ include_directories(rank
 add_executable(rank 
     src/main.cpp 
     src/screen.cpp
+    src/base_menu.cpp
+    src/main_menu.cpp
+    src/application.cpp
 )
 
 target_link_libraries(rank 

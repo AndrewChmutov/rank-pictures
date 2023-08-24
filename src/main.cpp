@@ -2,25 +2,16 @@
 #include <iostream>
 
 // Custom libraries
-#include "screen.hpp"
+#include "application.hpp"
 
 
 int main() {
-    Screen screen(1280, 720);
-    // ./cars/002b243a2b98c0012415693225b8efbf.jpg
-    screen.putPictureFrame(0, 0, 720, 720, "kek.jpg");
-    screen.putLabelFrame(720, 0, 200, 40, "Kek it was", 0, 0, 0);
+    Application app(
+        1280,
+        720,
+        "cars",
+        "fonts/Raleway-Regular.ttf"
+    );
 
-    while (true) {
-        SDL_EventType input_result = screen.input();
-        screen.putBackground();
-        screen.show();
-
-        if (input_result == SDL_QUIT)
-            break;
-
-        SDL_Delay(20);
-    }
-
-    return 0;
+    return app.run();
 }

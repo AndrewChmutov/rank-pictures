@@ -4,9 +4,10 @@
 #include <SDL_render.h>
 #include <SDL_surface.h>
 #include <SDL_ttf.h>
+#include <cstddef>
 #include <cstdlib>
 
-Screen::Screen(std::size_t width, std::size_t height) {
+Screen::Screen(int width, int height, std::string windowName, std::string pathToFont) {
     // Initialize different subsystems
     if (SDL_Init(SDL_INIT_VIDEO < 0)) {
         fprintf(stderr, "%s\n", "Could not initialize video!");
@@ -44,7 +45,7 @@ Screen::Screen(std::size_t width, std::size_t height) {
         SDL_RENDERER_ACCELERATED
     );
 
-    font = TTF_OpenFont("fonts/Raleway-Regular.ttf", 400);
+    font = TTF_OpenFont(pathToFont.c_str(), 400);
 
     if (font == NULL) {
         fprintf(stderr, "%s\n", "Could not initialize font!");
@@ -53,37 +54,15 @@ Screen::Screen(std::size_t width, std::size_t height) {
 }
 
 
-SDL_EventType Screen::input() {
-    SDL_Event event;
+void Screen::resize(int newWidth, int newHeight) {
+    SDL_RenderSetLogicalSize(renderer, newWidth, newHeight);
+}
 
-    // Handle events
-    while(SDL_PollEvent(&event)) {
-        switch (event.type) {
-            // Close window button or ESC key
-            case SDL_QUIT:
-                return SDL_QUIT;
-            case SDL_KEYDOWN:
-                if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-                    return SDL_QUIT;
-            
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    std::size_t newWidth = event.window.data1;
-                    std::size_t newHeight = event.window.data2;
-                    SDL_RenderSetLogicalSize(renderer, newWidth, newHeight);
-                }
-                else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED) {
-                    SDL_MaximizeWindow(window);
-                    int w, h;
-                    SDL_GetWindowSize(window, &w, &h);
-                    SDL_RenderSetLogicalSize(renderer, w, h);
-                }
-                break;
-        }
-    }
 
-    // Default case
-    return SDL_USEREVENT;
+void Screen::maximize(int& w, int& h) {
+    SDL_MaximizeWindow(window);
+    SDL_GetWindowSize(window, &w, &h);
+    SDL_RenderSetLogicalSize(renderer, w, h);
 }
 
 
