@@ -8,6 +8,7 @@ class MainMenu : public BaseMenu {
     SDL_Texture* textureLabel, * textureLeft, * textureRight;
     TTF_Font* font;
     int lineX1, lineY1, lineX2, lineY2;
+    int boxW, boxH;
     int fontSize;
     std::string text;
 

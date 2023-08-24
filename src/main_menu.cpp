@@ -2,13 +2,17 @@
 #include <SDL2/SDL_image.h>
 #include <SDL_render.h>
 #include <SDL_surface.h>
+#include <SDL_ttf.h>
+#include <cstddef>
 
 
 MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2) :
         rectLabel({0, 0, 0, 0}),
         rectLeft({0, 0, 0, 0}), 
         rectRight({0, 0, 0, 0}),
-        fontSize(20){
+        fontSize(20),
+        boxW(500),
+        boxH(500) {
     font = TTF_OpenFont(pathToFont.c_str(), 200);
 
     if (font == NULL) {
@@ -54,6 +58,28 @@ void MainMenu::update(const Screen& screen) {
 
     lineY1 = rectLabel.y + rectLabel.h + 10;
     lineY2 = windowY - 10;
+
+
+    int imgX, imgY;
+    SDL_QueryTexture(textureLeft, NULL, NULL, &imgX, &imgY);
+
+    float ratio = 1.0f * imgX / imgY;
+    float ratioBox = 1.0f * boxW / boxH;
+
+    if (ratio > ratioBox) {
+        rectLeft.w = boxW;
+        rectLeft.h = 1.0f * boxW / ratio;
+    
+        rectLeft.x = windowX / 2 - 60 - boxW;
+        rectLeft.y = windowY / 2 - rectLeft.h / 2;
+    }
+    else {
+        rectLeft.h = boxH;
+        rectLeft.w = ratio * boxH;
+
+        rectLeft.y = windowY / 2 - boxH / 2;
+        rectLeft.x = windowX / 2 - 60 - boxW + (boxW / 2 - rectLeft.w / 2);
+    }
 }
 
 
@@ -67,6 +93,8 @@ void MainMenu::render(Screen& screen) {
         textureLabel
     );
 
+    screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
+
     screen.putLine(lineX1, lineY1, lineX2, lineY2, 128, 128, 128);
 
     screen.show();
@@ -77,4 +105,6 @@ MainMenu::~MainMenu() {
     SDL_DestroyTexture(textureRight);
     SDL_DestroyTexture(textureLeft);
     SDL_DestroyTexture(textureLabel);
+
+    TTF_CloseFont(font);
 }
