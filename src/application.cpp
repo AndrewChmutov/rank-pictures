@@ -4,7 +4,6 @@
 #include <memory>
 #include "main_menu.hpp"
 #include <filesystem>
-#include <iostream>
 #include <random>
 
 
@@ -62,8 +61,8 @@ void Application::switchToMain() {
     dist = std::uniform_int_distribution<>(0, countEntries - 1);
     first = dist(gen);
 
-    dist = std::uniform_int_distribution<>(0, countEntries - 2);
-    second = (first + dist(gen)) % (first - 1);
+    dist = std::uniform_int_distribution<>(1, countEntries - 1);
+    second = (first + dist(gen)) % countEntries;
 
     std::string firstPath, secondPath;
     std::size_t n = 0;
