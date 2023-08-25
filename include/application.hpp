@@ -14,7 +14,7 @@ class Application {
     std::unique_ptr<BaseMenu> currentMenu;
     bool isRunning;
     std::mt19937 gen;
-
+    std::uniform_int_distribution<int> dist;
 
     void update();
 

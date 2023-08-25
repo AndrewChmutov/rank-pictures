@@ -4,6 +4,8 @@
 #include <memory>
 #include "main_menu.hpp"
 #include <filesystem>
+#include <iostream>
+#include <random>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
@@ -51,10 +53,35 @@ void Application::update() {
 
 
 void Application::switchToMain() {
+    std::size_t countEntries = 0;
+    for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
+        countEntries++;
+    }
+
+    std::size_t first, second;
+    dist = std::uniform_int_distribution<>(0, countEntries - 1);
+    first = dist(gen);
+
+    dist = std::uniform_int_distribution<>(0, countEntries - 2);
+    second = (first + dist(gen)) % (first - 1);
+
+    std::string firstPath, secondPath;
+    std::size_t n = 0;
+    for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
+        if (n == first)
+            firstPath = entry.path().string();
+        if (n == second)
+            secondPath = entry.path().string();
+        n++;
+    }
+
+    std::cout << firstPath << std::endl;
+    std::cout << secondPath << std::endl;
+
     currentMenu = std::make_unique<MainMenu>(
         screen,
         pathToFont,
-        "keker.jpg",
-        "kek2.jpg"
+        firstPath,
+        secondPath
     );
 }
