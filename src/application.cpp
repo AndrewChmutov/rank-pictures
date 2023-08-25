@@ -75,9 +75,6 @@ void Application::switchToMain() {
         n++;
     }
 
-    std::cout << firstPath << std::endl;
-    std::cout << secondPath << std::endl;
-
     currentMenu = std::make_unique<MainMenu>(
         screen,
         pathToFont,
