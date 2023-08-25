@@ -28,7 +28,7 @@ MenuEvent BaseMenu::handleEvents(Screen& screen) {
                 break;
 
             default:
-                handleSpecificEvent(event, screen);
+                return handleSpecificEvent(event, screen);
         }
     }
 

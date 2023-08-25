@@ -1,5 +1,7 @@
 #include "main_menu.hpp"
+#include "menu_events.hpp"
 #include <SDL2/SDL_image.h>
+#include <SDL_events.h>
 #include <SDL_render.h>
 #include <SDL_surface.h>
 #include <SDL_ttf.h>
@@ -40,8 +42,22 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
 }
 
 
-void MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) {
-    
+MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) {
+    switch(event.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            SDL_Point mousepoint;
+            mousepoint.x = event.motion.x;
+            mousepoint.y = event.motion.y;
+
+            if (SDL_PointInRect(&mousepoint, &leftBorders) ||
+                SDL_PointInRect(&mousepoint, &rightBorders)) {
+                return MenuEvent::TO_MAIN_SCREEN;
+            }
+
+            break;
+    }
+
+    return MenuEvent::NONE;
 }
 
 void MainMenu::update(const Screen& screen) {

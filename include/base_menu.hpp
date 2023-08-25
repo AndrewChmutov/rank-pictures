@@ -8,7 +8,7 @@ class BaseMenu {
 public:
     virtual MenuEvent handleEvents(Screen& screen);
 
-    virtual void handleSpecificEvent(const SDL_Event& event, Screen& screen) = 0;
+    virtual MenuEvent handleSpecificEvent(const SDL_Event& event, Screen& screen) = 0;
 
     virtual void render(Screen& screen);
 
