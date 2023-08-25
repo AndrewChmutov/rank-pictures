@@ -102,7 +102,7 @@ void MainMenu::update(const Screen& screen) {
         rectRight.w = ratio * boxH;
 
         rectRight.y = windowY / 2 - boxH / 2;
-        rectRight.x = windowX / 2 + 60;
+        rectRight.x = windowX / 2 + 60 + boxW / 2 - rectRight.w / 2;
     }
 }
 
