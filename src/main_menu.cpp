@@ -55,9 +55,11 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
             mousepoint.y = event.motion.y;
 
             // Check if it is in a rect
-            if (SDL_PointInRect(&mousepoint, &leftBorders) ||
-                SDL_PointInRect(&mousepoint, &rightBorders)) {
-                return MenuEvent::TO_MAIN_SCREEN;
+            if (SDL_PointInRect(&mousepoint, &leftBorders)) {
+                toReturn = MenuEvent::LEFT_CHOSEN;
+            }
+            else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
+                toReturn = MenuEvent::RIGHT_CHOSEN;
             }
 
             break;

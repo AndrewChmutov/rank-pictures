@@ -42,9 +42,14 @@ void Application::update() {
             isRunning = false;
             break;
 
+        case MenuEvent::LEFT_CHOSEN:
+            // TO-DO
+        case MenuEvent::RIGHT_CHOSEN:
+            // TO-DO
         // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
             switchToMain();
+            break;
 
         // Rating screen command
         case MenuEvent::TO_RATING_SCREEN:

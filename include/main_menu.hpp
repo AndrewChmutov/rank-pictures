@@ -31,6 +31,9 @@ class MainMenu : public BaseMenu {
     SDL_Rect leftBorders, rightBorders;
     int boxW, boxH;
 
+    // For app communication
+    MenuEvent toReturn;
+
 public:
     MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2);
 
