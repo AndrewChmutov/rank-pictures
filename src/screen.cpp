@@ -1,12 +1,9 @@
 #include "screen.hpp"
 
+// SDL libraries
 #include <SDL2/SDL_image.h>
-#include <SDL_rect.h>
-#include <SDL_render.h>
-#include <SDL_surface.h>
 #include <SDL_ttf.h>
-#include <cstddef>
-#include <cstdlib>
+
 
 Screen::Screen(int width, int height, std::string windowName) {
     // Initialize different subsystems
@@ -65,7 +62,10 @@ void Screen::resize(int newWidth, int newHeight) {
 
 void Screen::maximize(int& w, int& h) {
     SDL_MaximizeWindow(window);
+
+    // Get values of width and height by reference
     SDL_GetWindowSize(window, &w, &h);
+
     SDL_RenderSetLogicalSize(renderer, w, h);
 }
 
@@ -86,6 +86,8 @@ void Screen::show() {
 
 void Screen::putTexturedRect(int x, int y, int w, int h, SDL_Texture* texture) {
     SDL_Rect rect {x, y, w, h};
+
+    // Render texture on rectangle
     SDL_RenderCopy(
         renderer,
         texture,
@@ -98,7 +100,10 @@ void Screen::putTexturedRect(int x, int y, int w, int h, SDL_Texture* texture) {
 void Screen::putLine(int x1, int y1, int x2, int y2, 
                 uint8_t r, uint8_t g, 
                 uint8_t b, uint8_t opacity) {
+    // Set color for a line
     SDL_SetRenderDrawColor(renderer, r, g, b, opacity);
+
+    // Draw a line
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
 }
 
@@ -106,7 +111,10 @@ void Screen::putLine(int x1, int y1, int x2, int y2,
 void Screen::putRect(int x1, int y1, int x2, int y2,
                 uint8_t r, uint8_t g,
                 uint8_t b, uint8_t opacity) {
+    // Set color for a rect
     SDL_SetRenderDrawColor(renderer, r, g, b, opacity);
+
+    // Draw a rect
     SDL_Rect rect = {std::min(x1, x2), std::min(y1, y2), abs(x1 - x2), abs(y1 - y2)};
     SDL_RenderDrawRect(renderer, &rect);
 }

@@ -1,29 +1,30 @@
 #include "application.hpp"
 #include "menu_events.hpp"
-#include <exception>
-#include <memory>
 #include "main_menu.hpp"
 #include <filesystem>
-#include <random>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
+    // Setup a screen
     screen(w, h, "Picture ranking"),
+
+    // Setup main paths
     pathToPictures(pathToPictures),
     pathToFont(pathToFont),
+
+    // Setup random generation
     gen(std::random_device()()){
 
+    // Start from main menu
     switchToMain();
 }
+
 
 int Application::run() {
     isRunning = true;
 
     while (isRunning) {
         update();
-        
-        if (!isRunning)
-            break;
     }
 
     return 0;
@@ -31,21 +32,30 @@ int Application::run() {
 
 
 void Application::update() {
+    // Hangle SDL events
     MenuEvent event = currentMenu.get()->handleEvents(screen);
 
+    // Communication between menu and app
     switch (event) {
+        // Exit command
         case MenuEvent::EXIT:
             isRunning = false;
             break;
 
+        // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
             switchToMain();
 
+        // Rating screen command
         case MenuEvent::TO_RATING_SCREEN:
+            // TO-DO
+        
+        // If no info is provided
         case MenuEvent::NONE:
             break;
     }
 
+    // Update window and render
     currentMenu.get()->update(screen);
     currentMenu.get()->render(screen);
 }
