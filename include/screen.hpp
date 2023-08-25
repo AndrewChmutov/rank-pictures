@@ -33,6 +33,10 @@ public:
                 uint8_t r = 255, uint8_t g= 255, 
                 uint8_t b = 255, uint8_t opacity = 255);
 
+    void putRect(int x1, int y1, int x2, int y2, 
+                uint8_t r = 255, uint8_t g= 255, 
+                uint8_t b = 255, uint8_t opacity = 255);
+
     void clear();
 
     void show();

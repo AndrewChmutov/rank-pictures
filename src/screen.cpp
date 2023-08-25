@@ -103,6 +103,15 @@ void Screen::putLine(int x1, int y1, int x2, int y2,
 }
 
 
+void Screen::putRect(int x1, int y1, int x2, int y2,
+                uint8_t r, uint8_t g,
+                uint8_t b, uint8_t opacity) {
+    SDL_SetRenderDrawColor(renderer, r, g, b, opacity);
+    SDL_Rect rect = {std::min(x1, x2), std::min(y1, y2), abs(x1 - x2), abs(y1 - y2)};
+    SDL_RenderDrawRect(renderer, &rect);
+}
+
+
 Screen::~Screen() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

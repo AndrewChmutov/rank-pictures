@@ -5,6 +5,7 @@
 
 class MainMenu : public BaseMenu {
     SDL_Rect rectLabel, rectLeft, rectRight;
+    SDL_Rect leftBorders, rightBorders;
     SDL_Texture* textureLabel, * textureLeft, * textureRight;
     TTF_Font* font;
     int lineX1, lineY1, lineX2, lineY2;

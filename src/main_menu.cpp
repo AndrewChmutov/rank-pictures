@@ -85,6 +85,13 @@ void MainMenu::update(const Screen& screen) {
     }
 
 
+    leftBorders = SDL_Rect {
+        windowX/2 - boxW - 60, 
+        windowY / 2 - boxH / 2,
+        boxW,
+        boxH,
+    };
+
     SDL_QueryTexture(textureRight, NULL, NULL, &imgX, &imgY);
 
     ratio = 1.0f * imgX / imgY;
@@ -104,6 +111,13 @@ void MainMenu::update(const Screen& screen) {
         rectRight.y = windowY / 2 - boxH / 2;
         rectRight.x = windowX / 2 + 60 + boxW / 2 - rectRight.w / 2;
     }
+
+    rightBorders = SDL_Rect {
+        windowX/2 + 60, 
+        windowY / 2 - boxH / 2,
+        boxW,
+        boxH,
+    };
 }
 
 
@@ -115,6 +129,22 @@ void MainMenu::render(Screen& screen) {
         rectLabel.w,
         rectLabel.h,
         textureLabel
+    );
+
+    screen.putRect(
+        leftBorders.x, 
+        leftBorders.y, 
+        leftBorders.x + leftBorders.w,
+        leftBorders.y + leftBorders.h,
+        128, 128, 128
+    );
+
+    screen.putRect(
+        rightBorders.x, 
+        rightBorders.y, 
+        rightBorders.x + rightBorders.w,
+        rightBorders.y + rightBorders.h,
+        128, 128, 128
     );
 
     screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
