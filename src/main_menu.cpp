@@ -147,6 +147,9 @@ void MainMenu::render(Screen& screen) {
         textureLabel
     );
 
+    screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
+    screen.putTexturedRect(rectRight.x, rectRight.y, rectRight.w, rectRight.h, textureRight);
+
     screen.putRect(
         leftBorders.x, 
         leftBorders.y, 
@@ -162,9 +165,6 @@ void MainMenu::render(Screen& screen) {
         rightBorders.y + rightBorders.h,
         128, 128, 128
     );
-
-    screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
-    screen.putTexturedRect(rectRight.x, rectRight.y, rectRight.w, rectRight.h, textureRight);
 
     screen.putLine(lineX1, lineY1, lineX2, lineY2, 128, 128, 128);
 
