@@ -1,7 +1,12 @@
 #pragma once
 
+// Custom libraries
 #include "screen.hpp"
 #include "base_menu.hpp"
+#include "picture_record.hpp"
+
+// C++ standard libraries
+#include <vector>
 #include <memory>
 #include <random>
 
@@ -22,6 +27,11 @@ class Application {
     // Random integer generation
     std::mt19937 gen;
     std::uniform_int_distribution<int> dist;
+
+    
+
+    std::vector<PictureRecord> pictures;
+    std::vector<std::string> pathPictures;
 
     // Update menu
     void update();

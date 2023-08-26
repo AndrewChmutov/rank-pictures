@@ -7,7 +7,7 @@
 // SDL libraries
 #include <SDL2/SDL_image.h>
 
-MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2) :
+MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToLeft, std::string pathToRight) :
         rectLabel({0, 0, 0, 0}),
         rectLeft({0, 0, 0, 0}), 
         rectRight({0, 0, 0, 0}),
@@ -41,12 +41,12 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
     SDL_FreeSurface(temp);
 
     // Get texture of the first image
-    temp = IMG_Load(pathToPic1.c_str());
+    temp = IMG_Load(pathToLeft.c_str());
     textureLeft = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
     // Get texture of the second image
-    temp = IMG_Load(pathToPic2.c_str());
+    temp = IMG_Load(pathToRight.c_str());
     textureRight = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 

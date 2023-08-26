@@ -1,7 +1,9 @@
 #include "application.hpp"
 #include "menu_events.hpp"
 #include "main_menu.hpp"
+#include "picture_record.hpp"
 #include <filesystem>
+#include <random>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
@@ -14,7 +16,18 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
 
     // Setup random generation
     gen(std::random_device()()){
+    
+    // Get all the current pictures in the directory
+    pictures.clear();
+    for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
+        if (entry.path().extension().string() == ".jpg" ||
+                entry.path().extension().string() == ".png" ||
+                entry.path().extension().string() == ".bmp") {
+            pictures.push_back(PictureRecord{entry.path().filename().string(), 0, 0});
+            pathPictures.push_back(entry.path().string());
+        }
 
+    }
     // Start from main menu
     switchToMain();
 }
@@ -31,7 +44,6 @@ int Application::run() {
     return 0;
 }
 
-#include <iostream>
 void Application::update() {
     // Hangle SDL events
     MenuEvent event = currentMenu.get()->handleEvents(screen);
@@ -78,32 +90,18 @@ void Application::render() {
 
 
 void Application::switchToMain() {
-    std::size_t countEntries = 0;
-    for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
-        countEntries++;
-    }
+    // from 0 to size - 1
+    dist = std::uniform_int_distribution<>(0, pictures.size() - 1);
+    int left = dist(gen);
 
-    std::size_t first, second;
-    dist = std::uniform_int_distribution<>(0, countEntries);
-    first = dist(gen);
-
-    dist = std::uniform_int_distribution<>(1, countEntries - 1);
-    second = (first + dist(gen)) % countEntries;
-
-    std::string firstPath, secondPath;
-    std::size_t n = 0;
-    for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
-        if (n == first)
-            firstPath = entry.path().string();
-        if (n == second)
-            secondPath = entry.path().string();
-        n++;
-    }
+    // from first to first - 1 (cycle)
+    dist = std::uniform_int_distribution<>(1, pictures.size());
+    int right = (left + dist(gen)) % (pictures.size());
 
     currentMenu = std::make_unique<MainMenu>(
         screen,
         pathToFont,
-        firstPath,
-        secondPath
+        pathPictures[left],
+        pathPictures[right]
     );
 }

@@ -59,7 +59,7 @@ class MainMenu : public BaseMenu {
     // Blending mode to default
     void resetBlend();
 public:
-    MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2);
+    MainMenu(Screen& screen, std::string pathToFont, std::string pathToPicLeft, std::string pathToPicRight);
     virtual MenuEvent handleEvents(Screen& screen) override;
 
     // Obligatory implementation of a successor
