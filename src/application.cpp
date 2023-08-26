@@ -84,7 +84,7 @@ void Application::switchToMain() {
     }
 
     std::size_t first, second;
-    dist = std::uniform_int_distribution<>(0, countEntries - 1);
+    dist = std::uniform_int_distribution<>(0, countEntries);
     first = dist(gen);
 
     dist = std::uniform_int_distribution<>(1, countEntries - 1);
