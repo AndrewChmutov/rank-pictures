@@ -3,6 +3,7 @@
 // Custom libraries
 #include "base_menu.hpp"
 #include "menu_events.hpp"
+#include "picture_record.hpp"
 #include "transition_state.hpp"
 
 // SDL libraries
@@ -32,6 +33,9 @@ class MainMenu : public BaseMenu {
     SDL_Rect leftBorders, rightBorders;
     int boxW, boxH;
 
+    // Pictures
+    PictureRecord& recordLeft,& recordRight;
+
     // For app communication
     MenuEvent toReturn;
 
@@ -58,8 +62,15 @@ class MainMenu : public BaseMenu {
 
     // Blending mode to default
     void resetBlend();
+
+    // Handle when left picture is chosen
+    void leftWins();
+
+    // Handle when right picture is chosen
+    void rightWins();
 public:
-    MainMenu(Screen& screen, std::string pathToFont, std::string pathToPicLeft, std::string pathToPicRight);
+    MainMenu(Screen& screen, std::string pathToFont, PictureRecord& recordLeft, PictureRecord& recordRight, 
+                std::string pathToPicLeft, std::string pathToPicRight);
     virtual MenuEvent handleEvents(Screen& screen) override;
 
     // Obligatory implementation of a successor

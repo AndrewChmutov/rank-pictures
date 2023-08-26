@@ -2,12 +2,14 @@
 
 // Custom libraries
 #include "base_menu.hpp"
+#include "picture_record.hpp"
 #include "transition_state.hpp"
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
 
-MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToLeft, std::string pathToRight) :
+MainMenu::MainMenu(Screen& screen, std::string pathToFont, PictureRecord& recordLeft, 
+                    PictureRecord& recordRight, std::string pathToLeft, std::string pathToRight) :
         rectLabel({0, 0, 0, 0}),
         rectLeft({0, 0, 0, 0}), 
         rectRight({0, 0, 0, 0}),
@@ -16,7 +18,9 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToLef
         boxH(500),
         lineMargin(60),
         transitionState(TransitionState::FADE_IN),
-        transitionProgress(0.0f) {
+        transitionProgress(0.0f),
+        recordLeft(recordLeft),
+        recordRight(recordRight) {
     // Setup font //
     // Open font
     font = TTF_OpenFont(pathToFont.c_str(), 50);
@@ -132,7 +136,7 @@ void MainMenu::renderTransitionOut() {
 
 MenuEvent MainMenu::handleEvents(Screen& screen) {
     if (transitionState == TransitionState::END)
-        return toReturn;
+        return MenuEvent::TO_MAIN_SCREEN;
 
     return BaseMenu::handleEvents(screen);
 }
@@ -152,11 +156,11 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
             // Don't restart transition if it is running
             if (transitionState != TransitionState::FADE_OUT) {
                 if (SDL_PointInRect(&mousepoint, &leftBorders)) {
-                    toReturn = MenuEvent::LEFT_CHOSEN;
+                    leftWins();
                     startTransitionOut();
                 }
                 else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
-                    toReturn = MenuEvent::RIGHT_CHOSEN;
+                    rightWins();
                     startTransitionOut();
                 }
             }
@@ -323,6 +327,20 @@ void MainMenu::render(Screen& screen) {
 
     // Show changed frame
     screen.show();
+}
+
+
+void MainMenu::leftWins() {
+    recordLeft.wins++;
+    recordLeft.total++;
+    recordRight.total++;
+}
+
+
+void MainMenu::rightWins() {
+    recordRight.wins++;
+    recordRight.total++;
+    recordLeft.total++;
 }
 
 

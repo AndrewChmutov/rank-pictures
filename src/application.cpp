@@ -4,6 +4,7 @@
 #include "picture_record.hpp"
 #include <filesystem>
 #include <random>
+#include <iostream>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
@@ -21,6 +22,7 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
     pictures.clear();
     for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
         if (entry.path().extension().string() == ".jpg" ||
+                entry.path().extension().string() == ".jpeg" ||
                 entry.path().extension().string() == ".png" ||
                 entry.path().extension().string() == ".bmp") {
             pictures.push_back(PictureRecord{entry.path().filename().string(), 0, 0});
@@ -55,16 +57,6 @@ void Application::update() {
             isRunning = false;
             break;
 
-        case MenuEvent::LEFT_CHOSEN:
-            // TO-DO
-            // std::cout << "left" << std::endl;
-            switchToMain();
-            break;
-        case MenuEvent::RIGHT_CHOSEN:
-            // TO-DO
-            // std::cout << "right" << std::endl;
-            switchToMain();
-            break;
         // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
             switchToMain();
@@ -95,13 +87,30 @@ void Application::switchToMain() {
     int left = dist(gen);
 
     // from first to first - 1 (cycle)
-    dist = std::uniform_int_distribution<>(1, pictures.size());
+    dist = std::uniform_int_distribution<>(1, pictures.size() - 1);
     int right = (left + dist(gen)) % (pictures.size());
 
     currentMenu = std::make_unique<MainMenu>(
         screen,
         pathToFont,
+        pictures[left],
+        pictures[right],
         pathPictures[left],
         pathPictures[right]
     );
+}
+
+
+void Application::debug() {
+    for(auto& picture : pictures) {
+        std::cout << "Name: " << picture.name << std::endl;
+        std::cout << "Wins: " << picture.wins << std::endl;
+        std::cout << "Total: " << picture.total << std::endl;
+        std::cout << "Success rate: " << 1.0f * picture.wins / picture.total << std::endl << std::endl;
+    }
+}
+
+
+Application::~Application() {
+    debug();
 }

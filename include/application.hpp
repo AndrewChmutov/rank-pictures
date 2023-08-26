@@ -28,8 +28,6 @@ class Application {
     std::mt19937 gen;
     std::uniform_int_distribution<int> dist;
 
-    
-
     std::vector<PictureRecord> pictures;
     std::vector<std::string> pathPictures;
 
@@ -41,10 +39,14 @@ class Application {
 
     // Change view to main menu
     void switchToMain();
+
+    // Debug information into ostream
+    void debug();
 public:
     Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont);
 
     // Method for main loop of the application
     int run();
 
+    ~Application();
 };
