@@ -39,6 +39,24 @@ class MainMenu : public BaseMenu {
     TransitionState transitionState;
     float transitionProgress, delta, acceleration;
 
+    // Starts transition to another menu
+    void startTransitionOut();
+
+    // Updates transition if the state is FADE_IN
+    void updateTrantisionIn();
+    // Updates transition if the state is FADE_OUT
+    void updateTransitionOut();
+
+    // Changes opacity of the pictures and moves them down
+    void renderTransitionIn();
+    // Changes opacity of the pictures and moves them sidewards
+    void renderTransitionOut();
+
+    // Blending mode to change opacity
+    void blend();
+
+    // Blending mode to default
+    void resetBlend();
 public:
     MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2);
     virtual MenuEvent handleEvents(Screen& screen) override;
@@ -53,9 +71,6 @@ public:
     // Render menu
     virtual void render(Screen& scrern) override;
 
-    void startTransition();
-
-    void updateTransition();
 
     virtual ~MainMenu() override;
 };

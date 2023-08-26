@@ -4,8 +4,6 @@
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
-#include <SDL_blendmode.h>
-#include <SDL_render.h>
 
 MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2) :
         rectLabel({0, 0, 0, 0}),
@@ -15,7 +13,7 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
         boxW(500),
         boxH(500),
         lineMargin(60),
-        transitionState(TransitionState::NONE),
+        transitionState(TransitionState::FADE_IN),
         transitionProgress(0.0f) {
     // Setup font //
     // Open font
@@ -72,11 +70,11 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
             // Check if it is in a rect
             if (SDL_PointInRect(&mousepoint, &leftBorders)) {
                 toReturn = MenuEvent::LEFT_CHOSEN;
-                startTransition();
+                startTransitionOut();
             }
             else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
                 toReturn = MenuEvent::RIGHT_CHOSEN;
-                startTransition();
+                startTransitionOut();
             }
 
             break;
@@ -191,7 +189,7 @@ void MainMenu::update(const Screen& screen) {
         boxH,
     };
 
-    updateTransition();
+    updateTransitionOut();
 }
 
 
@@ -209,7 +207,7 @@ void MainMenu::render(Screen& screen) {
     );
 
     // Print pictures
-    if (transitionState == TransitionState::RUNNING) {
+    if (transitionState == TransitionState::FADE_OUT) {
         // screen.blend();
         SDL_SetTextureAlphaMod(textureLeft, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(textureRight, 255 - static_cast<int>(transitionProgress * 255));
@@ -242,8 +240,8 @@ void MainMenu::render(Screen& screen) {
 }
 
 
-void MainMenu::startTransition() {
-    transitionState = TransitionState::RUNNING;
+void MainMenu::startTransitionOut() {
+    transitionState = TransitionState::FADE_OUT;
     transitionProgress = 0.0f;
     delta = 0.005f;
     acceleration = 1.0f;
@@ -253,8 +251,8 @@ void MainMenu::startTransition() {
 }
 
 
-void MainMenu::updateTransition() {
-    if (transitionState != TransitionState::RUNNING)
+void MainMenu::updateTransitionOut() {
+    if (transitionState != TransitionState::FADE_OUT)
         return;
 
     transitionProgress += delta;
