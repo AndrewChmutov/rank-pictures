@@ -23,8 +23,11 @@ class Application {
     std::mt19937 gen;
     std::uniform_int_distribution<int> dist;
 
-    // Update menu and render
+    // Update menu
     void update();
+
+    // Render
+    void render();
 
     // Change view to main menu
     void switchToMain();

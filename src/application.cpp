@@ -25,6 +25,7 @@ int Application::run() {
 
     while (isRunning) {
         update();
+        render();
     }
 
     return 0;
@@ -68,6 +69,10 @@ void Application::update() {
 
     // Update window and render
     currentMenu.get()->update(screen);
+}
+
+
+void Application::render() {
     currentMenu.get()->render(screen);
 }
 
