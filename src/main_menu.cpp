@@ -48,6 +48,18 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
     temp = IMG_Load(pathToPic2.c_str());
     textureRight = screen.toTexture(temp);
     SDL_FreeSurface(temp);
+
+    startTransitionIn();
+}
+
+
+void MainMenu::startTransitionIn() {
+    transitionState = TransitionState::FADE_IN;
+    transitionProgress = 0.0f;
+    delta = 0.005f;
+
+    SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -58,6 +70,28 @@ void MainMenu::startTransitionOut() {
 
     SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);
+}
+
+
+void MainMenu::updateTransitionIn() {
+    if (transitionState != TransitionState::FADE_IN)
+        return;
+
+    float acceleration = 2.0f * 1.25f * boxH, t = 1.0f - transitionProgress;
+
+
+    rectLeft.y += acceleration * t * t / 2;
+    leftBorders.y+= acceleration * t * t / 2;
+
+    rectRight.y += acceleration * t * t / 2;
+    rightBorders.y += acceleration * t * t / 2;
+
+    transitionProgress += delta;
+
+    if (transitionProgress >= 1.0f) {
+        transitionProgress = 1.0f;
+        transitionState = TransitionState::NONE;
+    }
 }
 
 
@@ -80,6 +114,12 @@ void MainMenu::updateTransitionOut() {
         transitionProgress = 1.0f;
         transitionState = TransitionState::END;
     }
+}
+
+
+void MainMenu::renderTransitionIn() {
+    SDL_SetTextureAlphaMod(textureLeft, static_cast<int>(transitionProgress * 255));
+    SDL_SetTextureAlphaMod(textureRight, static_cast<int>(transitionProgress * 255));
 }
 
 
@@ -232,7 +272,10 @@ void MainMenu::update(const Screen& screen) {
         boxH,
     };
 
-    updateTransitionOut();
+    if (transitionState == TransitionState::FADE_IN)
+        updateTransitionIn();
+    else if (transitionState == TransitionState::FADE_OUT)
+        updateTransitionOut();
 }
 
 
@@ -250,7 +293,9 @@ void MainMenu::render(Screen& screen) {
     );
 
     // Print pictures
-    if (transitionState == TransitionState::FADE_OUT)
+    if (transitionState == TransitionState::FADE_IN)
+        renderTransitionIn();
+    else if (transitionState == TransitionState::FADE_OUT)
         renderTransitionOut();
     screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
     screen.putTexturedRect(rectRight.x, rectRight.y, rectRight.w, rectRight.h, textureRight);

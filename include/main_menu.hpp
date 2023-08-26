@@ -40,10 +40,11 @@ class MainMenu : public BaseMenu {
     float transitionProgress, delta;
 
     // Starts transition to another menu
+    void startTransitionIn();
     void startTransitionOut();
 
     // Updates transition if the state is FADE_IN
-    void updateTrantisionIn();
+    void updateTransitionIn();
     // Updates transition if the state is FADE_OUT
     void updateTransitionOut();
 
