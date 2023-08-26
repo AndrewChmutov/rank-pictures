@@ -4,13 +4,14 @@
 #include "base_menu.hpp"
 #include "picture_record.hpp"
 #include "transition_state.hpp"
+#include <string>
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
 
 MainMenu::MainMenu(Screen& screen, std::string pathToFont, PictureRecord& recordLeft, 
                     PictureRecord& recordRight, std::string pathToLeft, std::string pathToRight) :
-        rectLabel({0, 0, 0, 0}),
+        counterRectLeft({0, 0, 0, 0}),
         rectLeft({0, 0, 0, 0}), 
         rectRight({0, 0, 0, 0}),
         fontSize(20),
@@ -78,6 +79,43 @@ void MainMenu::startTransitionOut() {
 }
 
 
+void MainMenu::setupCounters(Screen& screen) {
+    // Text for counters
+    counterLeft = std::to_string(recordLeft.wins);
+    counterRight = std::to_string(recordRight.wins);
+
+    // Rectangles for rendering
+    counterRectLeft.w = fontSize * counterLeft.size();
+    counterRectLeft.h = 2.4f * fontSize;
+    counterRectLeft.x = leftBorders.x + leftBorders.w / 2 - counterRectLeft.w / 2;
+    counterRectLeft.y = leftBorders.y + leftBorders.h / 2 - counterRectLeft.h / 2;
+
+    counterRectRight.w = fontSize * counterRight.size();
+    counterRectRight.h = 2.4f * fontSize;
+    counterRectRight.x = rightBorders.x + rightBorders.w / 2 - counterRectRight.w / 2;
+    counterRectRight.y = rightBorders.y + rightBorders.h / 2 - counterRectRight.h / 2;
+
+    // // Get shaders for rendering counters
+    SDL_Surface* temp = TTF_RenderText_Shaded(
+        font,
+        counterLeft.c_str(),
+        {0, static_cast<uint8_t>(leftWinner? 255 : 0), 0, 255},
+        {255, 255, 255, 0}
+    );
+    counterTextureLeft = screen.toTexture(temp);
+    SDL_FreeSurface(temp);
+
+    temp = TTF_RenderText_Shaded(
+        font,
+        counterRight.c_str(),
+        {0, static_cast<uint8_t>(leftWinner? 0 : 255), 0, 255},
+        {255, 255, 255, 0}
+    );
+    counterTextureRight = screen.toTexture(temp);
+    SDL_FreeSurface(temp);
+}
+
+
 void MainMenu::updateTransitionIn() {
     if (transitionState != TransitionState::FADE_IN)
         return;
@@ -122,6 +160,19 @@ void MainMenu::updateTransitionOut() {
 }
 
 
+void MainMenu::updateCounters() {
+    if (// transitionState != TransitionState::FADE_IN &&
+            transitionState != TransitionState::FADE_OUT)
+        return;
+
+    if (transitionProgress >= 1.0f) {
+        SDL_DestroyTexture(counterTextureLeft);
+        SDL_DestroyTexture(counterTextureRight);
+    }
+
+}
+
+
 void MainMenu::renderTransitionIn() {
     SDL_SetTextureAlphaMod(textureLeft, static_cast<int>(transitionProgress * 255));
     SDL_SetTextureAlphaMod(textureRight, static_cast<int>(transitionProgress * 255));
@@ -131,6 +182,28 @@ void MainMenu::renderTransitionIn() {
 void MainMenu::renderTransitionOut() {
     SDL_SetTextureAlphaMod(textureLeft, 255 - static_cast<int>(transitionProgress * 255));
     SDL_SetTextureAlphaMod(textureRight, 255 - static_cast<int>(transitionProgress * 255));
+}
+
+
+void MainMenu::renderCounters(Screen& screen) {
+    if (// transitionState != TransitionState::FADE_IN &&
+            transitionState != TransitionState::FADE_OUT)
+        return;
+    screen.putTexturedRect(
+        counterRectLeft.x, 
+        counterRectLeft.y, 
+        counterRectLeft.w,
+        counterRectLeft.h,
+        counterTextureLeft
+    );
+
+    screen.putTexturedRect(
+        counterRectRight.x, 
+        counterRectRight.y, 
+        counterRectRight.w,
+        counterRectRight.h,
+        counterTextureRight
+    );
 }
 
 
@@ -157,10 +230,12 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
             if (transitionState != TransitionState::FADE_OUT) {
                 if (SDL_PointInRect(&mousepoint, &leftBorders)) {
                     leftWins();
+                    setupCounters(screen);
                     startTransitionOut();
                 }
                 else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
                     rightWins();
+                    setupCounters(screen);
                     startTransitionOut();
                 }
             }
@@ -277,10 +352,10 @@ void MainMenu::update(const Screen& screen) {
         boxH,
     };
 
-    if (transitionState == TransitionState::FADE_IN)
-        updateTransitionIn();
-    else if (transitionState == TransitionState::FADE_OUT)
-        updateTransitionOut();
+    updateTransitionIn();
+    updateTransitionOut();
+
+    updateCounters();
 }
 
 
@@ -296,6 +371,8 @@ void MainMenu::render(Screen& screen) {
         rectLabel.h,
         textureLabel
     );
+
+    renderCounters(screen);
 
     // Print pictures
     if (transitionState == TransitionState::FADE_IN)
@@ -334,6 +411,8 @@ void MainMenu::leftWins() {
     recordLeft.wins++;
     recordLeft.total++;
     recordRight.total++;
+
+    leftWinner = true;
 }
 
 
@@ -341,6 +420,8 @@ void MainMenu::rightWins() {
     recordRight.wins++;
     recordRight.total++;
     recordLeft.total++;
+
+    leftWinner = false;
 }
 
 

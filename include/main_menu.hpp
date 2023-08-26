@@ -10,6 +10,8 @@
 #include <SDL2/SDL_ttf.h>
 
 class MainMenu : public BaseMenu {
+    bool leftWinner;
+
     // Line coords
     int lineX1, lineY1, lineX2, lineY2;
 
@@ -28,6 +30,11 @@ class MainMenu : public BaseMenu {
     std::string text;
     SDL_Rect rectLabel;
     SDL_Texture* textureLabel;
+
+    // Counters
+    std::string counterLeft, counterRight;
+    SDL_Rect counterRectLeft, counterRectRight;
+    SDL_Texture* counterTextureLeft,* counterTextureRight;
 
     // Picture boxes
     SDL_Rect leftBorders, rightBorders;
@@ -52,10 +59,16 @@ class MainMenu : public BaseMenu {
     // Updates transition if the state is FADE_OUT
     void updateTransitionOut();
 
+    // Counter indicates amount of wins
+    void setupCounters(Screen& screen);
+    void updateCounters();
+
     // Changes opacity of the pictures and moves them down
     void renderTransitionIn();
     // Changes opacity of the pictures and moves them sidewards
     void renderTransitionOut();
+
+    void renderCounters(Screen& screen);
 
     // Blending mode to change opacity
     void blend();
