@@ -19,7 +19,7 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
         transitionProgress(0.0f) {
     // Setup font //
     // Open font
-    font = TTF_OpenFont(pathToFont.c_str(), 200);
+    font = TTF_OpenFont(pathToFont.c_str(), 50);
 
     // Check for errors
     if (font == NULL) {
@@ -31,10 +31,11 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
     text = "Choose the better one!";
 
     //  Get texture of a font
-    SDL_Surface* temp = TTF_RenderText_Solid(
+    SDL_Surface* temp = TTF_RenderText_Shaded(
         font,
         text.c_str(),
-        {0, 0, 0, 255}
+        {0, 0, 0, 255},
+        {255, 255, 255, 0}
     );
     textureLabel = screen.toTexture(temp);
     SDL_FreeSurface(temp);
