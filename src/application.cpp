@@ -30,7 +30,7 @@ int Application::run() {
     return 0;
 }
 
-
+#include <iostream>
 void Application::update() {
     // Hangle SDL events
     MenuEvent event = currentMenu.get()->handleEvents(screen);
@@ -44,8 +44,14 @@ void Application::update() {
 
         case MenuEvent::LEFT_CHOSEN:
             // TO-DO
+            // std::cout << "left" << std::endl;
+            switchToMain();
+            break;
         case MenuEvent::RIGHT_CHOSEN:
             // TO-DO
+            // std::cout << "right" << std::endl;
+            switchToMain();
+            break;
         // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
             switchToMain();

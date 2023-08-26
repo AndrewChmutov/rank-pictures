@@ -3,6 +3,7 @@
 // Custom libraries
 #include "base_menu.hpp"
 #include "menu_events.hpp"
+#include "transition_state.hpp"
 
 // SDL libraries
 #include <SDL2/SDL_ttf.h>
@@ -34,8 +35,13 @@ class MainMenu : public BaseMenu {
     // For app communication
     MenuEvent toReturn;
 
+    // Transition
+    TransitionState transitionState;
+    float transitionProgress, delta, acceleration;
+
 public:
     MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic1, std::string pathToPic2);
+    virtual MenuEvent handleEvents(Screen& screen) override;
 
     // Obligatory implementation of a successor
     // Handles picture presses
@@ -46,6 +52,10 @@ public:
 
     // Render menu
     virtual void render(Screen& scrern) override;
+
+    void startTransition();
+
+    void updateTransition();
 
     virtual ~MainMenu() override;
 };
