@@ -1,4 +1,6 @@
 #include "main_menu.hpp"
+
+// Custom libraries
 #include "base_menu.hpp"
 #include "transition_state.hpp"
 
@@ -52,8 +54,7 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
 void MainMenu::startTransitionOut() {
     transitionState = TransitionState::FADE_OUT;
     transitionProgress = 0.0f;
-    delta = 0.005f;
-    acceleration = 1.0f;
+    delta = 0.002f;
 
     SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);
@@ -64,13 +65,27 @@ void MainMenu::updateTransitionOut() {
     if (transitionState != TransitionState::FADE_OUT)
         return;
 
+    float acceleration = 2.0f * 1.25f * boxW, t = 1.0f - transitionProgress;
+
+
+    rectLeft.x -= 1.25f * boxW - acceleration * t * t / 2;
+    leftBorders.x -= 1.25f * boxW - acceleration * t * t / 2;
+
+    rectRight.x += 1.25f * boxW - acceleration * t * t / 2;
+    rightBorders.x += 1.25f * boxW - acceleration * t * t / 2;
+
     transitionProgress += delta;
-    delta *= acceleration;
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
         transitionState = TransitionState::END;
     }
+}
+
+
+void MainMenu::renderTransitionOut() {
+    SDL_SetTextureAlphaMod(textureLeft, 255 - static_cast<int>(transitionProgress * 255));
+    SDL_SetTextureAlphaMod(textureRight, 255 - static_cast<int>(transitionProgress * 255));
 }
 
 
@@ -93,13 +108,16 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
             mousepoint.y = event.motion.y;
 
             // Check if it is in a rect
-            if (SDL_PointInRect(&mousepoint, &leftBorders)) {
-                toReturn = MenuEvent::LEFT_CHOSEN;
-                startTransitionOut();
-            }
-            else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
-                toReturn = MenuEvent::RIGHT_CHOSEN;
-                startTransitionOut();
+            // Don't restart transition if it is running
+            if (transitionState != TransitionState::FADE_OUT) {
+                if (SDL_PointInRect(&mousepoint, &leftBorders)) {
+                    toReturn = MenuEvent::LEFT_CHOSEN;
+                    startTransitionOut();
+                }
+                else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
+                    toReturn = MenuEvent::RIGHT_CHOSEN;
+                    startTransitionOut();
+                }
             }
 
             break;
@@ -232,11 +250,8 @@ void MainMenu::render(Screen& screen) {
     );
 
     // Print pictures
-    if (transitionState == TransitionState::FADE_OUT) {
-        // screen.blend();
-        SDL_SetTextureAlphaMod(textureLeft, 255 - static_cast<int>(transitionProgress * 255));
-        SDL_SetTextureAlphaMod(textureRight, 255 - static_cast<int>(transitionProgress * 255));
-    }
+    if (transitionState == TransitionState::FADE_OUT)
+        renderTransitionOut();
     screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
     screen.putTexturedRect(rectRight.x, rectRight.y, rectRight.w, rectRight.h, textureRight);
 

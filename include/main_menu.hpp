@@ -37,7 +37,7 @@ class MainMenu : public BaseMenu {
 
     // Transition
     TransitionState transitionState;
-    float transitionProgress, delta, acceleration;
+    float transitionProgress, delta;
 
     // Starts transition to another menu
     void startTransitionOut();
