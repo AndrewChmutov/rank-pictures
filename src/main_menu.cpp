@@ -49,6 +49,31 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, std::string pathToPic
 }
 
 
+void MainMenu::startTransitionOut() {
+    transitionState = TransitionState::FADE_OUT;
+    transitionProgress = 0.0f;
+    delta = 0.005f;
+    acceleration = 1.0f;
+
+    SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);
+}
+
+
+void MainMenu::updateTransitionOut() {
+    if (transitionState != TransitionState::FADE_OUT)
+        return;
+
+    transitionProgress += delta;
+    delta *= acceleration;
+
+    if (transitionProgress >= 1.0f) {
+        transitionProgress = 1.0f;
+        transitionState = TransitionState::END;
+    }
+}
+
+
 MenuEvent MainMenu::handleEvents(Screen& screen) {
     if (transitionState == TransitionState::END)
         return toReturn;
@@ -237,31 +262,6 @@ void MainMenu::render(Screen& screen) {
 
     // Show changed frame
     screen.show();
-}
-
-
-void MainMenu::startTransitionOut() {
-    transitionState = TransitionState::FADE_OUT;
-    transitionProgress = 0.0f;
-    delta = 0.005f;
-    acceleration = 1.0f;
-
-    SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
-    SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);
-}
-
-
-void MainMenu::updateTransitionOut() {
-    if (transitionState != TransitionState::FADE_OUT)
-        return;
-
-    transitionProgress += delta;
-    delta *= acceleration;
-
-    if (transitionProgress >= 1.0f) {
-        transitionProgress = 1.0f;
-        transitionState = TransitionState::END;
-    }
 }
 
 
