@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <random>
 #include <iostream>
+#include <string>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
@@ -30,6 +31,8 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
         }
 
     }
+    lastLeft = -1;
+    lastRight = -1;
     // Start from main menu
     switchToMain();
 }
@@ -57,9 +60,15 @@ void Application::update() {
             isRunning = false;
             break;
 
+        case MenuEvent::TO_MAIN_NEXT:
+            switchToMain();
+            break;
+
         // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
             switchToMain();
+            lastLeft = -1;
+            lastRight = -1;
             break;
 
         // Rating screen command
@@ -96,8 +105,13 @@ void Application::switchToMain() {
         pictures[left],
         pictures[right],
         pathPictures[left],
-        pathPictures[right]
+        pathPictures[right],
+        (lastLeft == -1)? "" : std::to_string(pictures[lastLeft].wins),
+        (lastRight== -1)? "" :std::to_string(pictures[lastRight].wins)
     );
+
+    lastLeft = left;
+    lastRight = right;
 }
 
 
@@ -112,5 +126,5 @@ void Application::debug() {
 
 
 Application::~Application() {
-    debug();
+    // debug();
 }

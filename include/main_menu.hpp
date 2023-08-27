@@ -10,7 +10,7 @@
 #include <SDL2/SDL_ttf.h>
 
 class MainMenu : public BaseMenu {
-    bool leftWinner;
+    int leftWinner;
 
     // Line coords
     int lineX1, lineY1, lineX2, lineY2;
@@ -34,7 +34,7 @@ class MainMenu : public BaseMenu {
     // Counters
     std::string counterLeft, counterRight;
     SDL_Rect counterRectLeft, counterRectRight;
-    SDL_Texture* counterTextureLeft,* counterTextureRight;
+    SDL_Texture* counterTextureLeft,* counterTextureRight,* counterWinner;
 
     // Picture boxes
     SDL_Rect leftBorders, rightBorders;
@@ -60,7 +60,7 @@ class MainMenu : public BaseMenu {
     void updateTransitionOut();
 
     // Counter indicates amount of wins
-    void setupCounters(Screen& screen);
+    void setupCounters(std::string counterLeft, std::string counterRight, Screen& screen);
     void updateCounters();
 
     // Changes opacity of the pictures and moves them down
@@ -82,8 +82,9 @@ class MainMenu : public BaseMenu {
     // Handle when right picture is chosen
     void rightWins();
 public:
-    MainMenu(Screen& screen, std::string pathToFont, PictureRecord& recordLeft, PictureRecord& recordRight, 
-                std::string pathToPicLeft, std::string pathToPicRight);
+    MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recordLeft, PictureRecord& recordRight, 
+                std::string& pathToPicLeft, std::string& pathToPicRight,
+                std::string lastLeft, std::string lastRight);
     virtual MenuEvent handleEvents(Screen& screen) override;
 
     // Obligatory implementation of a successor

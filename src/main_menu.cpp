@@ -4,13 +4,15 @@
 #include "base_menu.hpp"
 #include "picture_record.hpp"
 #include "transition_state.hpp"
+#include <SDL_render.h>
 #include <string>
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
 
-MainMenu::MainMenu(Screen& screen, std::string pathToFont, PictureRecord& recordLeft, 
-                    PictureRecord& recordRight, std::string pathToLeft, std::string pathToRight) :
+MainMenu::MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recordLeft, 
+                    PictureRecord& recordRight, std::string& pathToLeft, std::string& pathToRight,
+                    std::string lastLeft, std::string lastRight) :
         counterRectLeft({0, 0, 0, 0}),
         rectLeft({0, 0, 0, 0}), 
         rectRight({0, 0, 0, 0}),
@@ -21,7 +23,8 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, PictureRecord& record
         transitionState(TransitionState::FADE_IN),
         transitionProgress(0.0f),
         recordLeft(recordLeft),
-        recordRight(recordRight) {
+        recordRight(recordRight),
+        leftWinner(-1) {
     // Setup font //
     // Open font
     font = TTF_OpenFont(pathToFont.c_str(), 50);
@@ -56,6 +59,30 @@ MainMenu::MainMenu(Screen& screen, std::string pathToFont, PictureRecord& record
     SDL_FreeSurface(temp);
 
     startTransitionIn();
+
+
+    int windowX, windowY;
+    screen.getSize(windowX, windowY);
+
+    // Calculate the sizes for that borders
+    boxW = static_cast<int>(500.0f / 1280 * windowX); 
+    boxH = static_cast<int>(500.0f / 720 * windowY);
+    
+    leftBorders = SDL_Rect {
+        windowX/2 - boxW - 60, 
+        windowY / 2 - boxH / 2,
+        boxW,
+        boxH,
+    };
+
+    rightBorders = SDL_Rect {
+        windowX/2 + 60, 
+        windowY / 2 - boxH / 2,
+        boxW,
+        boxH,
+    };
+
+    setupCounters(lastLeft, lastRight, screen);
 }
 
 
@@ -79,10 +106,7 @@ void MainMenu::startTransitionOut() {
 }
 
 
-void MainMenu::setupCounters(Screen& screen) {
-    // Text for counters
-    counterLeft = std::to_string(recordLeft.wins);
-    counterRight = std::to_string(recordRight.wins);
+void MainMenu::setupCounters(std::string counterLeft, std::string counterRight, Screen& screen) {
 
     // Rectangles for rendering
     counterRectLeft.w = fontSize * counterLeft.size();
@@ -99,7 +123,7 @@ void MainMenu::setupCounters(Screen& screen) {
     SDL_Surface* temp = TTF_RenderText_Shaded(
         font,
         counterLeft.c_str(),
-        {0, static_cast<uint8_t>(leftWinner? 255 : 0), 0, 255},
+        {0, 0, 0, 255},
         {255, 255, 255, 0}
     );
     counterTextureLeft = screen.toTexture(temp);
@@ -108,11 +132,25 @@ void MainMenu::setupCounters(Screen& screen) {
     temp = TTF_RenderText_Shaded(
         font,
         counterRight.c_str(),
-        {0, static_cast<uint8_t>(leftWinner? 0 : 255), 0, 255},
+        {0, 0, 0, 255},
         {255, 255, 255, 0}
     );
     counterTextureRight = screen.toTexture(temp);
     SDL_FreeSurface(temp);
+
+    if (leftWinner != -1) {
+        temp = TTF_RenderText_Shaded(
+            font,
+            leftWinner? counterLeft.c_str() : counterRight.c_str(),
+            {0, 240, 0, 255},
+            {255, 255, 255, 0}
+        );
+        counterWinner = screen.toTexture(temp);
+        SDL_FreeSurface(temp);
+        SDL_SetTextureBlendMode(counterWinner, SDL_BLENDMODE_BLEND);
+    }
+
+
 }
 
 
@@ -161,13 +199,21 @@ void MainMenu::updateTransitionOut() {
 
 
 void MainMenu::updateCounters() {
-    if (// transitionState != TransitionState::FADE_IN &&
+    if (transitionState != TransitionState::FADE_IN &&
             transitionState != TransitionState::FADE_OUT)
         return;
+
+    float ratio = 0.5f;
+    // if (leftWinner != -1 && transitionProgress >= ratio) {
+    //     SDL_SetTextureAlphaMod(counterWinner, static_cast<int>((1 - transitionProgress / ratio) * 255));
+    // }
+
 
     if (transitionProgress >= 1.0f) {
         SDL_DestroyTexture(counterTextureLeft);
         SDL_DestroyTexture(counterTextureRight);
+        if (leftWinner != -1)
+            SDL_DestroyTexture(counterWinner);
     }
 
 }
@@ -186,7 +232,7 @@ void MainMenu::renderTransitionOut() {
 
 
 void MainMenu::renderCounters(Screen& screen) {
-    if (// transitionState != TransitionState::FADE_IN &&
+    if (transitionState != TransitionState::FADE_IN &&
             transitionState != TransitionState::FADE_OUT)
         return;
     screen.putTexturedRect(
@@ -204,12 +250,31 @@ void MainMenu::renderCounters(Screen& screen) {
         counterRectRight.h,
         counterTextureRight
     );
+
+    if (leftWinner == 1) {
+        screen.putTexturedRect(
+            counterRectLeft.x, 
+            counterRectLeft.y, 
+            counterRectLeft.w,
+            counterRectLeft.h,
+            counterWinner
+        );
+    }
+    if (leftWinner == 0) {
+        screen.putTexturedRect(
+            counterRectRight.x, 
+            counterRectRight.y, 
+            counterRectRight.w,
+            counterRectRight.h,
+            counterWinner
+        );
+    }
 }
 
 
 MenuEvent MainMenu::handleEvents(Screen& screen) {
     if (transitionState == TransitionState::END)
-        return MenuEvent::TO_MAIN_SCREEN;
+        return MenuEvent::TO_MAIN_NEXT;
 
     return BaseMenu::handleEvents(screen);
 }
@@ -227,15 +292,15 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
 
             // Check if it is in a rect
             // Don't restart transition if it is running
-            if (transitionState != TransitionState::FADE_OUT) {
+            if (transitionState != TransitionState::FADE_IN && transitionState != TransitionState::FADE_OUT) {
                 if (SDL_PointInRect(&mousepoint, &leftBorders)) {
                     leftWins();
-                    setupCounters(screen);
+                    setupCounters(std::to_string(recordLeft.wins), std::to_string(recordRight.wins), screen);
                     startTransitionOut();
                 }
                 else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
                     rightWins();
-                    setupCounters(screen);
+                    setupCounters(std::to_string(recordLeft.wins), std::to_string(recordRight.wins), screen);
                     startTransitionOut();
                 }
             }
@@ -412,7 +477,7 @@ void MainMenu::leftWins() {
     recordLeft.total++;
     recordRight.total++;
 
-    leftWinner = true;
+    leftWinner = 1;
 }
 
 
@@ -421,7 +486,7 @@ void MainMenu::rightWins() {
     recordRight.total++;
     recordLeft.total++;
 
-    leftWinner = false;
+    leftWinner = 0;
 }
 
 

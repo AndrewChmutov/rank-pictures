@@ -31,6 +31,8 @@ class Application {
     std::vector<PictureRecord> pictures;
     std::vector<std::string> pathPictures;
 
+    int lastLeft, lastRight;
+
     // Update menu
     void update();
 
