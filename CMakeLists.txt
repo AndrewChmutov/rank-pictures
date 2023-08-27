@@ -21,6 +21,7 @@ add_executable(rank
     src/base_menu.cpp
     src/main_menu.cpp
     src/application.cpp
+    src/rank_menu.cpp
 )
 
 target_link_libraries(rank 

@@ -2,10 +2,12 @@
 #include "menu_events.hpp"
 #include "main_menu.hpp"
 #include "picture_record.hpp"
+#include "rank_menu.hpp"
 #include <filesystem>
 #include <random>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
@@ -66,15 +68,16 @@ void Application::update() {
 
         // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
-            switchToMain();
             lastLeft = -1;
             lastRight = -1;
+            switchToMain();
             break;
 
         // Rating screen command
         case MenuEvent::TO_RATING_SCREEN:
-            // TO-DO
-        
+            switchToRank();
+            break;
+
         // If no info is provided
         case MenuEvent::NONE:
             break;
@@ -112,6 +115,17 @@ void Application::switchToMain() {
 
     lastLeft = left;
     lastRight = right;
+}
+
+
+void Application::switchToRank() {
+    std::sort(pictures.begin(), pictures.end(),
+        [](const PictureRecord& first, const PictureRecord& second) {
+            return first.wins > second.wins;
+        }
+    );
+
+    currentMenu = std::make_unique<RankMenu>();
 }
 
 

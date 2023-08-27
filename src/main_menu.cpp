@@ -6,6 +6,7 @@
 #include "picture_record.hpp"
 #include "transition_state.hpp"
 #include <SDL_render.h>
+#include <SDL_scancode.h>
 #include <string>
 
 // SDL libraries
@@ -296,7 +297,7 @@ void MainMenu::removeCounters() {
 
 MenuEvent MainMenu::handleEvents(Screen& screen) {
     if (transitionState == TransitionState::END)
-        return MenuEvent::TO_MAIN_NEXT;
+        return toReturn;
 
     return BaseMenu::handleEvents(screen);
 }
@@ -305,6 +306,14 @@ MenuEvent MainMenu::handleEvents(Screen& screen) {
 
 MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) {
     switch(event.type) {
+        case SDL_KEYDOWN:
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                toReturn = MenuEvent::TO_RATING_SCREEN;
+                startTransitionOut();
+            }
+
+            break;
+        
         // Check the collision of a rect and a pointer if clicked
         case SDL_MOUSEBUTTONDOWN:
             // Get pointer position
@@ -319,11 +328,13 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
                     leftWins();
                     setupCounters(std::to_string(recordLeft.wins), std::to_string(recordRight.wins), screen);
                     startTransitionOut();
+                    toReturn = MenuEvent::TO_MAIN_NEXT;
                 }
                 else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
                     rightWins();
                     setupCounters(std::to_string(recordLeft.wins), std::to_string(recordRight.wins), screen);
                     startTransitionOut();
+                    toReturn = MenuEvent::TO_MAIN_NEXT;
                 }
             }
 

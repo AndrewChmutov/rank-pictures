@@ -42,6 +42,9 @@ class Application {
     // Change view to main menu
     void switchToMain();
 
+
+    void switchToRank();
+
     // Debug information into ostream
     void debug();
 public:
