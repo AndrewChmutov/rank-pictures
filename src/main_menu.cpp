@@ -2,6 +2,7 @@
 
 // Custom libraries
 #include "base_menu.hpp"
+#include "menu_events.hpp"
 #include "picture_record.hpp"
 #include "transition_state.hpp"
 #include <SDL_render.h>
@@ -24,7 +25,10 @@ MainMenu::MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recor
         transitionProgress(0.0f),
         recordLeft(recordLeft),
         recordRight(recordRight),
-        leftWinner(-1) {
+        leftWinner(-1),
+        counterTextureLeft(nullptr),
+        counterTextureRight(nullptr),
+        counterWinner(nullptr) {
     // Setup font //
     // Open font
     font = TTF_OpenFont(pathToFont.c_str(), 50);
@@ -169,6 +173,8 @@ void MainMenu::updateTransitionIn() {
 
     transitionProgress += delta;
 
+    updateCounters();
+
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
         transitionState = TransitionState::NONE;
@@ -191,8 +197,11 @@ void MainMenu::updateTransitionOut() {
 
     transitionProgress += delta;
 
+    updateCounters();
+
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
+        updateCounters();
         transitionState = TransitionState::END;
     }
 }
@@ -203,19 +212,10 @@ void MainMenu::updateCounters() {
             transitionState != TransitionState::FADE_OUT)
         return;
 
-    float ratio = 0.5f;
-    // if (leftWinner != -1 && transitionProgress >= ratio) {
-    //     SDL_SetTextureAlphaMod(counterWinner, static_cast<int>((1 - transitionProgress / ratio) * 255));
-    // }
-
-
-    if (transitionProgress >= 1.0f) {
-        SDL_DestroyTexture(counterTextureLeft);
-        SDL_DestroyTexture(counterTextureRight);
-        if (leftWinner != -1)
-            SDL_DestroyTexture(counterWinner);
+    float ratio = 0.7f;
+    if (leftWinner != -1 && transitionProgress >= ratio) {
+        SDL_SetTextureAlphaMod(counterWinner, static_cast<int>((1 - transitionProgress) / (1 - ratio) * 255));
     }
-
 }
 
 
@@ -233,7 +233,8 @@ void MainMenu::renderTransitionOut() {
 
 void MainMenu::renderCounters(Screen& screen) {
     if (transitionState != TransitionState::FADE_IN &&
-            transitionState != TransitionState::FADE_OUT)
+            transitionState != TransitionState::FADE_OUT && 
+            transitionState != TransitionState::END)
         return;
     screen.putTexturedRect(
         counterRectLeft.x, 
@@ -268,6 +269,27 @@ void MainMenu::renderCounters(Screen& screen) {
             counterRectRight.h,
             counterWinner
         );
+    }
+}
+
+
+void MainMenu::removeCounters() {
+    if (transitionState == TransitionState::NONE ||
+            transitionState == TransitionState::END) {
+        if (counterTextureLeft) {
+            SDL_DestroyTexture(counterTextureLeft);
+            counterTextureLeft = nullptr;
+        }
+
+        if (counterTextureRight) {
+            SDL_DestroyTexture(counterTextureRight);
+            counterTextureRight = nullptr;
+        }
+
+        if (leftWinner == -1 && counterWinner) {
+            SDL_DestroyTexture(counterWinner);
+            counterWinner = nullptr;
+        }
     }
 }
 
@@ -419,8 +441,6 @@ void MainMenu::update(const Screen& screen) {
 
     updateTransitionIn();
     updateTransitionOut();
-
-    updateCounters();
 }
 
 
@@ -438,6 +458,7 @@ void MainMenu::render(Screen& screen) {
     );
 
     renderCounters(screen);
+    removeCounters();
 
     // Print pictures
     if (transitionState == TransitionState::FADE_IN)

@@ -81,6 +81,9 @@ class MainMenu : public BaseMenu {
 
     // Handle when right picture is chosen
     void rightWins();
+
+
+    void removeCounters();
 public:
     MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recordLeft, PictureRecord& recordRight, 
                 std::string& pathToPicLeft, std::string& pathToPicRight,
