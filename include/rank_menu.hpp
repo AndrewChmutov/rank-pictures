@@ -2,6 +2,7 @@
 
 // Custom libraries
 #include "base_menu.hpp"
+#include "menu_events.hpp"
 #include "transition_state.hpp"
 #include "picture_record.hpp"
 
@@ -10,15 +11,44 @@
 #include <SDL2/SDL_ttf.h>
 
 class RankMenu : public BaseMenu {
-    SDL_Texture* picture;
-    SDL_Texture* name,* wins,* winrate,* total;
+    // Font fot labels
     TTF_Font* font;
-    
-    TransitionState transitionState;
-    float transitionProgress;
-    float delta;
 
-    PictureRecord& pictures;
+    // Name
+    std::string nameText;
+    SDL_Rect nameRect;
+    SDL_Texture* nameTexture;
+
+    // Wins
+    std::string winsText;
+    SDL_Rect winsRect;
+    SDL_Texture* winsTexture;
+
+    // Winrate
+    std::string winrateText;
+    SDL_Rect winrateRect;
+    SDL_Texture* winrateTexture;
+
+    // Total
+    std::string totalText;
+    SDL_Rect totalRect;
+    SDL_Texture* totalTexture;
+
+    // Picture
+    SDL_Texture* pictureTexture;
+    SDL_Rect pictureRect;
+    int boxW, boxH;
+
+    SDL_Rect borders;
+    float displacement;
+
+    TransitionState transitionState;
+    float transitionProgress, delta;
+
+    PictureRecord& picture;
+    int index, size;
+
+    MenuEvent toReturn;
 
     void startTransitionIn();
     void startTransitionOut();
@@ -27,9 +57,15 @@ class RankMenu : public BaseMenu {
     void updateTransitionOut();
 
 public:
-    RankMenu(PictureRecord& picture);
+    RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path);
+
+    virtual MenuEvent handleEvents(Screen& screen) override;
 
     virtual MenuEvent handleSpecificEvent(const SDL_Event& event, Screen& screen) override;
 
     virtual void update(const Screen& screen) override;
+
+    virtual void render(Screen& screen) override;
+
+    virtual ~RankMenu() override;
 };

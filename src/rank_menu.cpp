@@ -1,16 +1,162 @@
 #include "rank_menu.hpp"
+
+// Custom libraries
 #include "menu_events.hpp"
-#include <SDL_events.h>
-#include <type_traits>
+#include "picture_record.hpp"
+
+// SDL libraries
+#include <SDL2/SDL_image.h>
 
 
+RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path) : 
+        picture(picture), 
+        transitionState(TransitionState::FADE_IN),
+        index(index),
+        size(size),
+        displacement(0.75f) {
+
+    SDL_Surface* temp;
+
+    temp = IMG_Load((path + "/" + picture.name).c_str());
+    pictureTexture = screen.toTexture(temp);
+    SDL_FreeSurface(temp);
+
+    startTransitionIn();
+}
+
+
+MenuEvent RankMenu::handleEvents(Screen& screen) {
+    if (transitionState == TransitionState::END)
+        return toReturn;
+
+    return BaseMenu::handleEvents(screen);
+}
+
+#include <iostream>
 MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) {
     switch(event.type) {
         case SDL_KEYDOWN:
-            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
-                return MenuEvent::TO_MAIN_SCREEN;
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                toReturn = MenuEvent::TO_MAIN_SCREEN;
+                startTransitionOut();
+            }
 
     }
 
     return MenuEvent::NONE;
+}
+
+
+void RankMenu::startTransitionIn() {
+    transitionState = TransitionState::FADE_IN;
+    transitionProgress = 0.0f;
+    delta = 0.005f;
+}
+
+
+void RankMenu::startTransitionOut() {
+    transitionState = TransitionState::FADE_OUT;
+    transitionProgress = 0.0f;
+    delta = 0.002f;
+}
+
+
+void RankMenu::updateTransitionIn() {
+    if (transitionState != TransitionState::FADE_IN)
+        return;
+
+    transitionProgress += delta;
+
+    if (transitionProgress >= 1.0f) {
+        transitionProgress = 1.0f;
+        transitionState = TransitionState::NONE;
+    }
+}
+
+
+void RankMenu::updateTransitionOut() {
+    if (transitionState != TransitionState::FADE_OUT)
+        return;
+
+    transitionProgress += delta;
+
+    if (transitionProgress >= 1.0f) {
+        transitionProgress = 1.0f;
+        transitionState = TransitionState::END;
+    }
+}
+
+
+void RankMenu::update(const Screen &screen) {
+    int windowX, windowY;
+    screen.getSize(windowX, windowY);
+
+    boxW = static_cast<int>(500.0f / 1280 * windowX); 
+    boxH = static_cast<int>(500.0f / 720 * windowY);
+
+    int imgX, imgY;
+    SDL_QueryTexture(pictureTexture, NULL, NULL, &imgX, &imgY);
+    
+    float ratio = 1.0f * imgX / imgY;
+    float ratioBox = 1.0f * boxW / boxH;
+
+
+    if (ratio > ratioBox) {
+        // width - full width of the box
+        pictureRect.w = boxW;
+        // by ratio formula
+        pictureRect.h = 1.0f * boxW / ratio;
+
+        pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * boxW * (displacement - 0.5f) - pictureRect.w / 2);
+        pictureRect.y = windowY / 2 - pictureRect.h / 2;
+    }
+    else {
+        // height - full height of the box
+        pictureRect.h = boxH;
+        // by ratio formula
+        pictureRect.w = ratio * boxH;
+
+        pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * boxW * (displacement - 0.5f) - pictureRect.w / 2);
+        // pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * pictureRect.w * 3 / 4);
+        pictureRect.y = windowY / 2 - pictureRect.h / 2;
+    }
+
+    borders = SDL_Rect{
+        static_cast<int>(1.0f * windowX/2 - 1.0f * boxW * displacement),
+        windowY / 2 - boxH / 2,
+        boxW,
+        boxH
+    };
+
+
+    updateTransitionIn();
+    updateTransitionOut();
+}
+
+
+void RankMenu::render(Screen& screen) {
+    screen.putBackground();
+
+    screen.putRect(
+        borders.x,
+        borders.y,
+        borders.x + borders.w,
+        borders.y + borders.h,
+        128, 128, 128
+    );
+
+    screen.putTexturedRect(
+        pictureRect.x, 
+        pictureRect.y, 
+        pictureRect.w,
+        pictureRect.h,
+        pictureTexture
+    );
+
+    screen.show();
+}
+
+
+RankMenu::~RankMenu() {
+    SDL_DestroyTexture(pictureTexture);
 }

@@ -125,7 +125,13 @@ void Application::switchToRank() {
         }
     );
 
-    currentMenu = std::make_unique<RankMenu>();
+    currentMenu = std::make_unique<RankMenu>(
+        screen,
+        pictures[0],
+        0,
+        pictures.size(),
+        pathToPictures
+    );
 }
 
 
