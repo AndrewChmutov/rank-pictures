@@ -6,20 +6,26 @@
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
+#include <SDL_ttf.h>
 
 
-RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path) : 
+RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont) : 
         picture(picture), 
         transitionState(TransitionState::FADE_IN),
         index(index),
         size(size),
-        displacement(0.75f) {
+        displacement(0.75f),
+        nameFont(20),
+        pathFont(pathToFont){
 
     SDL_Surface* temp;
 
     temp = IMG_Load((path + "/" + picture.name).c_str());
     pictureTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
+
+    temp = TTF_RenderText_Shaded(
+        pathToFont, const char *text, SDL_Color fg, SDL_Color bg)
 
     startTransitionIn();
 }
@@ -32,7 +38,6 @@ MenuEvent RankMenu::handleEvents(Screen& screen) {
     return BaseMenu::handleEvents(screen);
 }
 
-#include <iostream>
 MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) {
     switch(event.type) {
         case SDL_KEYDOWN:
@@ -91,6 +96,12 @@ void RankMenu::update(const Screen &screen) {
     int windowX, windowY;
     screen.getSize(windowX, windowY);
 
+    nameRect.y = 10;
+    nameRect.w = nameFont;
+    nameRect.h = static_cast<int>(2.4 * nameFont);
+    nameRect.x = windowX / 2 - nameRect.x / 2;
+    
+    
     boxW = static_cast<int>(500.0f / 1280 * windowX); 
     boxH = static_cast<int>(500.0f / 720 * windowY);
 
@@ -137,6 +148,15 @@ void RankMenu::update(const Screen &screen) {
 void RankMenu::render(Screen& screen) {
     screen.putBackground();
 
+    screen.putTexturedRect(
+        nameRect.x,
+        nameRect.y,
+        nameRect.w,
+        nameRect.h,
+        nameTexture
+    );
+
+
     screen.putRect(
         borders.x,
         borders.y,
@@ -159,4 +179,5 @@ void RankMenu::render(Screen& screen) {
 
 RankMenu::~RankMenu() {
     SDL_DestroyTexture(pictureTexture);
+    SDL_DestroyTexture(nameTexture);
 }

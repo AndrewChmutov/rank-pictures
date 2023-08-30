@@ -130,7 +130,8 @@ void Application::switchToRank() {
         pictures[0],
         0,
         pictures.size(),
-        pathToPictures
+        pathToPictures,
+        pathToFont
     );
 }
 

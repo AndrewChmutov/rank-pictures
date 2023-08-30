@@ -3,6 +3,7 @@
 // Custom libraries
 #include "base_menu.hpp"
 #include "menu_events.hpp"
+#include "screen.hpp"
 #include "transition_state.hpp"
 #include "picture_record.hpp"
 
@@ -12,25 +13,22 @@
 
 class RankMenu : public BaseMenu {
     // Font fot labels
-    TTF_Font* font;
+    std::string pathFont;
 
     // Name
-    std::string nameText;
+    int nameFont;
     SDL_Rect nameRect;
     SDL_Texture* nameTexture;
 
     // Wins
-    std::string winsText;
     SDL_Rect winsRect;
     SDL_Texture* winsTexture;
 
     // Winrate
-    std::string winrateText;
     SDL_Rect winrateRect;
     SDL_Texture* winrateTexture;
 
     // Total
-    std::string totalText;
     SDL_Rect totalRect;
     SDL_Texture* totalTexture;
 
@@ -57,7 +55,7 @@ class RankMenu : public BaseMenu {
     void updateTransitionOut();
 
 public:
-    RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path);
+    RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont);
 
     virtual MenuEvent handleEvents(Screen& screen) override;
 
