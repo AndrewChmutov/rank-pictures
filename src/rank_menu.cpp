@@ -6,6 +6,7 @@
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
+#include <SDL_surface.h>
 #include <SDL_ttf.h>
 
 
@@ -24,8 +25,18 @@ RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, 
     pictureTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
+    TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
+
     temp = TTF_RenderText_Shaded(
-        pathToFont, const char *text, SDL_Color fg, SDL_Color bg)
+        font, 
+        picture.name.c_str(), 
+        {0, 0, 0, 255}, 
+        {255, 255, 255, 0}
+    );
+
+    nameTexture = screen.toTexture(temp);
+    SDL_FreeSurface(temp);
+    TTF_CloseFont(font);
 
     startTransitionIn();
 }
@@ -97,9 +108,9 @@ void RankMenu::update(const Screen &screen) {
     screen.getSize(windowX, windowY);
 
     nameRect.y = 10;
-    nameRect.w = nameFont;
+    nameRect.w = nameFont * picture.name.size();
     nameRect.h = static_cast<int>(2.4 * nameFont);
-    nameRect.x = windowX / 2 - nameRect.x / 2;
+    nameRect.x = windowX / 2 - nameRect.w / 2;
     
     
     boxW = static_cast<int>(500.0f / 1280 * windowX); 
