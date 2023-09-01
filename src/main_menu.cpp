@@ -307,7 +307,8 @@ MenuEvent MainMenu::handleEvents(Screen& screen) {
 MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) {
     switch(event.type) {
         case SDL_KEYDOWN:
-            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && 
+                transitionState == TransitionState::NONE) {
                 toReturn = MenuEvent::TO_RATING_SCREEN;
                 startTransitionOut();
             }
