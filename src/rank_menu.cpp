@@ -7,6 +7,7 @@
 // SDL libraries
 #include <SDL2/SDL_image.h>
 #include <SDL_ttf.h>
+#include <string>
 
 
 RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event) : 
@@ -16,6 +17,7 @@ RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, 
         size(size),
         displacement(1.0f),
         nameFont(20),
+        otherFont(13),
         pathFont(pathToFont),
         eventTransition(event) {
 
@@ -35,6 +37,20 @@ RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, 
     );
 
     nameTexture = screen.toTexture(temp);
+    SDL_FreeSurface(temp);
+    TTF_CloseFont(font);
+
+
+    font = TTF_OpenFont(pathToFont.c_str(), 50);
+    winsText = "Wins: " + std::to_string(picture.wins);
+    temp = TTF_RenderText_Shaded(
+        font, 
+        winsText.c_str(),
+        {0, 0, 0, 255}, 
+        {255, 255, 255, 0}
+    );
+
+    winsTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
     TTF_CloseFont(font);
 
@@ -183,6 +199,14 @@ void RankMenu::update(const Screen &screen) {
         boxH
     };
 
+    
+    winsRect = SDL_Rect {
+        borders.x + borders.w + 20,
+        borders.y + static_cast<int>(0.1f * borders.h),
+        static_cast<int>(otherFont * winsText.size()),
+        static_cast<int>(2.4f * otherFont)
+    };
+
 
     updateTransitionIn();
     updateTransitionOut();
@@ -198,6 +222,15 @@ void RankMenu::render(Screen& screen) {
         nameRect.w,
         nameRect.h,
         nameTexture
+    );
+
+
+    screen.putTexturedRect(
+        winsRect.x, 
+        winsRect.y, 
+        winsRect.w, 
+        winsRect.h, 
+        winsTexture
     );
 
 
@@ -222,6 +255,7 @@ void RankMenu::render(Screen& screen) {
 
 
 RankMenu::~RankMenu() {
-    SDL_DestroyTexture(pictureTexture);
+    SDL_DestroyTexture(winsTexture);
     SDL_DestroyTexture(nameTexture);
+    SDL_DestroyTexture(pictureTexture);
 }

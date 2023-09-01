@@ -20,8 +20,11 @@ class RankMenu : public BaseMenu {
     SDL_Rect nameRect;
     SDL_Texture* nameTexture;
 
+    int otherFont;
+
     // Wins
     SDL_Rect winsRect;
+    std::string winsText;
     SDL_Texture* winsTexture;
 
     // Winrate
