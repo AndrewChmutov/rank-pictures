@@ -84,15 +84,26 @@ void RankMenu::updateTransitionIn() {
 
     transitionProgress += delta;
 
-    float acceleration = 2.0f * 1.25f * boxH, t = 1.0f - transitionProgress;
-
-    pictureRect.y   += acceleration * t * t / 2;
-    borders.y       += acceleration * t * t / 2;
+    if (false) {}
+    else
+        updateTransitionDefaultIn();  
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
         transitionState = TransitionState::NONE;
     }
+}
+
+
+void RankMenu::updateTransitionDefaultIn() {
+    float acceleration = 2.0f * 1.25f * boxH, t = 1.0f - transitionProgress;
+
+    pictureRect.y   += acceleration * t * t / 2;
+    borders.y       += acceleration * t * t / 2;
+
+    acceleration = 2.0f * (10 + nameRect.h);
+
+    nameRect.y -= acceleration * t * t / 2;
 }
 
 
@@ -102,16 +113,26 @@ void RankMenu::updateTransitionOut() {
 
     transitionProgress += delta;
 
-    float acceleration = 2.0f * 1.25f * boxW, t = transitionProgress;
-
-    pictureRect.x   -= acceleration * t * t / 2;
-    borders.x       -= acceleration * t * t / 2;
-
+    if (false) {}
+    else
+        updateTransitionDefaultOut();
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
         transitionState = TransitionState::END;
     }
+}
+
+
+void RankMenu::updateTransitionDefaultOut() {
+    float acceleration = 2.0f * 1.25f * boxW, t = transitionProgress;
+
+    pictureRect.x   -= acceleration * t * t / 2;
+    borders.x       -= acceleration * t * t / 2;
+
+    acceleration = 2.0f * (10 + nameRect.h);
+
+    nameRect.y -= acceleration * t * t / 2;
 }
 
 

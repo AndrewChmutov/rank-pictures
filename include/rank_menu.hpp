@@ -53,7 +53,10 @@ class RankMenu : public BaseMenu {
     void startTransitionOut();
 
     void updateTransitionIn();
+    void updateTransitionDefaultIn();
+
     void updateTransitionOut();
+    void updateTransitionDefaultOut();
 
 public:
     RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event);
