@@ -75,7 +75,7 @@ void Application::update() {
 
         // Rating screen command
         case MenuEvent::TO_RATING_SCREEN:
-            switchToRank();
+            switchToRank(event);
             break;
 
         // If no info is provided
@@ -118,7 +118,7 @@ void Application::switchToMain() {
 }
 
 
-void Application::switchToRank() {
+void Application::switchToRank(MenuEvent event) {
     std::sort(pictures.begin(), pictures.end(),
         [](const PictureRecord& first, const PictureRecord& second) {
             return first.wins > second.wins;
@@ -131,7 +131,8 @@ void Application::switchToRank() {
         0,
         pictures.size(),
         pathToPictures,
-        pathToFont
+        pathToFont,
+        event
     );
 }
 

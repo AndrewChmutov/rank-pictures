@@ -46,6 +46,7 @@ class RankMenu : public BaseMenu {
     PictureRecord& picture;
     int index, size;
 
+    MenuEvent eventTransition;
     MenuEvent toReturn;
 
     void startTransitionIn();
@@ -55,7 +56,7 @@ class RankMenu : public BaseMenu {
     void updateTransitionOut();
 
 public:
-    RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont);
+    RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event);
 
     virtual MenuEvent handleEvents(Screen& screen) override;
 

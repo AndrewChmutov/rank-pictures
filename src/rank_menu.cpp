@@ -6,18 +6,18 @@
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
-#include <SDL_surface.h>
 #include <SDL_ttf.h>
 
 
-RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont) : 
+RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event) : 
         picture(picture), 
         transitionState(TransitionState::FADE_IN),
         index(index),
         size(size),
         displacement(1.0f),
         nameFont(20),
-        pathFont(pathToFont){
+        pathFont(pathToFont),
+        eventTransition(event) {
 
     SDL_Surface* temp;
 
@@ -52,7 +52,8 @@ MenuEvent RankMenu::handleEvents(Screen& screen) {
 MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) {
     switch(event.type) {
         case SDL_KEYDOWN:
-            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE &&
+                    transitionState == TransitionState::NONE) {
                 toReturn = MenuEvent::TO_MAIN_SCREEN;
                 startTransitionOut();
             }
@@ -83,6 +84,11 @@ void RankMenu::updateTransitionIn() {
 
     transitionProgress += delta;
 
+    float acceleration = 2.0f * 1.25f * boxH, t = 1.0f - transitionProgress;
+
+    pictureRect.y   += acceleration * t * t / 2;
+    borders.y       += acceleration * t * t / 2;
+
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
         transitionState = TransitionState::NONE;
@@ -95,6 +101,12 @@ void RankMenu::updateTransitionOut() {
         return;
 
     transitionProgress += delta;
+
+    float acceleration = 2.0f * 1.25f * boxW, t = transitionProgress;
+
+    pictureRect.x   -= acceleration * t * t / 2;
+    borders.x       -= acceleration * t * t / 2;
+
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;

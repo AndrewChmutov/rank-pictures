@@ -1,6 +1,7 @@
 #pragma once
 
 // Custom libraries
+#include "menu_events.hpp"
 #include "screen.hpp"
 #include "base_menu.hpp"
 #include "picture_record.hpp"
@@ -43,7 +44,7 @@ class Application {
     void switchToMain();
 
 
-    void switchToRank();
+    void switchToRank(MenuEvent event);
 
     // Debug information into ostream
     void debug();
