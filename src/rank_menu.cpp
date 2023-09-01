@@ -15,7 +15,7 @@ RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, 
         transitionState(TransitionState::FADE_IN),
         index(index),
         size(size),
-        displacement(0.75f),
+        displacement(1.0f),
         nameFont(20),
         pathFont(pathToFont){
 
