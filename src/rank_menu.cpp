@@ -84,6 +84,9 @@ void RankMenu::startTransitionIn() {
     transitionState = TransitionState::FADE_IN;
     transitionProgress = 0.0f;
     delta = 0.005f;
+
+    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(winsTexture, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -91,6 +94,9 @@ void RankMenu::startTransitionOut() {
     transitionState = TransitionState::FADE_OUT;
     transitionProgress = 0.0f;
     delta = 0.002f;
+
+    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(winsTexture, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -107,6 +113,9 @@ void RankMenu::updateTransitionIn() {
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
         transitionState = TransitionState::NONE;
+
+        SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_NONE);
+        SDL_SetTextureBlendMode(winsTexture, SDL_BLENDMODE_NONE);
     }
 }
 
@@ -120,6 +129,13 @@ void RankMenu::updateTransitionDefaultIn() {
     acceleration = 2.0f * (10 + nameRect.h);
 
     nameRect.y -= acceleration * t * t / 2;
+
+    if (transitionProgress <= 0.33f) {
+        acceleration = 2.0f * (winsRect.h);
+        t = (0.33f - transitionProgress) / 0.33f;
+
+        winsRect.y += acceleration * t * t / 2;
+    }
 }
 
 
@@ -149,6 +165,13 @@ void RankMenu::updateTransitionDefaultOut() {
     acceleration = 2.0f * (10 + nameRect.h);
 
     nameRect.y -= acceleration * t * t / 2;
+
+    if (transitionProgress <= 0.33f) {
+        acceleration = 2.0f * (winsRect.w);
+        t = (transitionProgress) / 0.33f;
+
+        winsRect.x += acceleration * t * t / 2;
+    }
 }
 
 
@@ -213,8 +236,29 @@ void RankMenu::update(const Screen &screen) {
 }
 
 
+void RankMenu::renderTransitionIn() {
+    if (transitionState != TransitionState::FADE_IN)
+        return;
+
+    SDL_SetTextureAlphaMod(pictureTexture, static_cast<int>(transitionProgress * 255));
+    SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress * 255));
+}
+
+
+void RankMenu::renderTransitionOut() {
+    if (transitionState != TransitionState::FADE_OUT)
+        return;
+
+    SDL_SetTextureAlphaMod(pictureTexture, 255 - static_cast<int>(transitionProgress * 255));
+    SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress * 255));
+}
+
+
 void RankMenu::render(Screen& screen) {
     screen.putBackground();
+
+    renderTransitionIn();
+    renderTransitionOut();
 
     screen.putTexturedRect(
         nameRect.x,

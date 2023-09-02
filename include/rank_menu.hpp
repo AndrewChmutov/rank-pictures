@@ -61,6 +61,9 @@ class RankMenu : public BaseMenu {
     void updateTransitionOut();
     void updateTransitionDefaultOut();
 
+    void renderTransitionIn();
+    void renderTransitionOut();
+
 public:
     RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event);
 
