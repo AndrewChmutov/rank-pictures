@@ -6,30 +6,28 @@
 #include "picture_record.hpp"
 #include "transition_state.hpp"
 #include <SDL_render.h>
-#include <SDL_scancode.h>
+#include <random>
 #include <string>
+#include <iostream>
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
 
-MainMenu::MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recordLeft, 
-                    PictureRecord& recordRight, std::string& pathToLeft, std::string& pathToRight,
-                    std::string lastLeft, std::string lastRight) :
-        counterRectLeft({0, 0, 0, 0}),
-        rectLeft({0, 0, 0, 0}), 
-        rectRight({0, 0, 0, 0}),
+MainMenu::MainMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string& pathToFont) :
+        font(nullptr),
+        textureLeft(nullptr),
+        textureRight(nullptr),
+        textureLabel(nullptr),
+        counterTextureLeft(nullptr),
+        counterTextureRight(nullptr),
+        counterWinner(nullptr),
+        pictures(pictures),
         fontSize(20),
         boxW(500),
         boxH(500),
         lineMargin(60),
-        transitionState(TransitionState::FADE_IN),
-        transitionProgress(0.0f),
-        recordLeft(recordLeft),
-        recordRight(recordRight),
         leftWinner(-1),
-        counterTextureLeft(nullptr),
-        counterTextureRight(nullptr),
-        counterWinner(nullptr) {
+        gen(std::random_device()()){
     // Setup font //
     // Open font
     font = TTF_OpenFont(pathToFont.c_str(), 50);
@@ -53,41 +51,63 @@ MainMenu::MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recor
     textureLabel = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
-    // Get texture of the first image
-    temp = IMG_Load(pathToLeft.c_str());
+    // Get new 2 pictures
+    getRandomDouble(screen);
+}
+
+
+void MainMenu::getRandomDouble(Screen& screen) {
+    dist = std::uniform_int_distribution<>(0, pictures.size() - 1);
+    currentLeft = dist(gen);
+
+    dist = std::uniform_int_distribution<>(1, pictures.size() - 1);
+    currentRight = (currentLeft + dist(gen)) % pictures.size();
+
+    if (textureLeft) {
+        SDL_DestroyTexture(textureLeft);
+        textureLeft = nullptr;
+    }
+
+    if (textureRight) {
+        SDL_DestroyTexture(textureRight);
+        textureRight = nullptr;
+    }
+
+    SDL_Surface* temp = IMG_Load(pictures[currentLeft].path.c_str());
     textureLeft = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
     // Get texture of the second image
-    temp = IMG_Load(pathToRight.c_str());
+    temp = IMG_Load(pictures[currentRight].path.c_str());
     textureRight = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
     startTransitionIn();
+}
 
 
-    int windowX, windowY;
-    screen.getSize(windowX, windowY);
+void MainMenu::updateWindowSize(const Screen& screen) {
+    screen.getSize(windowWidth, windowHeight);
+}
 
-    // Calculate the sizes for that borders
-    boxW = static_cast<int>(500.0f / 1280 * windowX); 
-    boxH = static_cast<int>(500.0f / 720 * windowY);
-    
+
+void MainMenu::updateBorders() {
+    boxW = static_cast<int>(500.0f / 1280 * windowWidth); 
+    boxH = static_cast<int>(500.0f / 720 * windowHeight);
+
     leftBorders = SDL_Rect {
-        windowX/2 - boxW - 60, 
-        windowY / 2 - boxH / 2,
+        windowWidth / 2 - boxW - 60, 
+        windowHeight / 2 - boxH / 2,
         boxW,
         boxH,
     };
 
     rightBorders = SDL_Rect {
-        windowX/2 + 60, 
-        windowY / 2 - boxH / 2,
+        windowWidth / 2 + 60, 
+        windowHeight / 2 - boxH / 2,
         boxW,
         boxH,
     };
-
-    setupCounters(lastLeft, lastRight, screen);
 }
 
 
@@ -102,7 +122,10 @@ void MainMenu::startTransitionIn() {
 
 
 void MainMenu::startTransitionOut() {
-    transitionState = TransitionState::FADE_OUT;
+    if (toReturn != MenuEvent::NONE)
+        transitionState = TransitionState::FADE_OUT_END;
+    else
+        transitionState = TransitionState::FADE_OUT;
     transitionProgress = 0.0f;
     delta = 0.002f;
 
@@ -111,7 +134,9 @@ void MainMenu::startTransitionOut() {
 }
 
 
-void MainMenu::setupCounters(std::string counterLeft, std::string counterRight, Screen& screen) {
+void MainMenu::setupCounters(Screen& screen) {
+    counterLeft = std::to_string(pictures[currentLeft].wins);
+    counterRight = std::to_string(pictures[currentRight].wins);
 
     // Rectangles for rendering
     counterRectLeft.w = fontSize * counterLeft.size();
@@ -123,6 +148,21 @@ void MainMenu::setupCounters(std::string counterLeft, std::string counterRight, 
     counterRectRight.h = 2.4f * fontSize;
     counterRectRight.x = rightBorders.x + rightBorders.w / 2 - counterRectRight.w / 2;
     counterRectRight.y = rightBorders.y + rightBorders.h / 2 - counterRectRight.h / 2;
+
+    if (counterTextureLeft) {
+        SDL_DestroyTexture(counterTextureLeft);
+        counterTextureLeft = nullptr;
+    }
+
+    if (counterTextureRight) {
+        SDL_DestroyTexture(counterTextureRight);
+        counterTextureRight = nullptr;
+    }
+
+    if (counterWinner) {
+        SDL_DestroyTexture(counterWinner);
+        counterWinner = nullptr;
+    }
 
     // // Get shaders for rendering counters
     SDL_Surface* temp = TTF_RenderText_Shaded(
@@ -158,7 +198,6 @@ void MainMenu::setupCounters(std::string counterLeft, std::string counterRight, 
 
 }
 
-
 void MainMenu::updateTransitionIn() {
     if (transitionState != TransitionState::FADE_IN)
         return;
@@ -172,9 +211,10 @@ void MainMenu::updateTransitionIn() {
     rectRight.y += acceleration * t * t / 2;
     rightBorders.y += acceleration * t * t / 2;
 
+    updateCounters();
+
     transitionProgress += delta;
 
-    updateCounters();
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
@@ -184,7 +224,8 @@ void MainMenu::updateTransitionIn() {
 
 
 void MainMenu::updateTransitionOut() {
-    if (transitionState != TransitionState::FADE_OUT)
+    if (transitionState != TransitionState::FADE_OUT && 
+            transitionState != TransitionState::FADE_OUT_END)
         return;
 
     float acceleration = 2.0f * 1.25f * boxW, t = 1.0f - transitionProgress;
@@ -196,14 +237,20 @@ void MainMenu::updateTransitionOut() {
     rectRight.x += 1.25f * boxW - acceleration * t * t / 2;
     rightBorders.x += 1.25f * boxW - acceleration * t * t / 2;
 
+    updateCounters();
+
     transitionProgress += delta;
 
-    updateCounters();
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
-        updateCounters();
-        transitionState = TransitionState::END;
+        leftWinner = -1;
+        if (transitionState == TransitionState::FADE_OUT_END) {
+            transitionState = TransitionState::END;
+        }
+        else {
+            transitionState = TransitionState::CHANGE;
+        }
     }
 }
 
@@ -235,6 +282,7 @@ void MainMenu::renderTransitionOut() {
 void MainMenu::renderCounters(Screen& screen) {
     if (transitionState != TransitionState::FADE_IN &&
             transitionState != TransitionState::FADE_OUT && 
+            transitionState != TransitionState::CHANGE && 
             transitionState != TransitionState::END)
         return;
     screen.putTexturedRect(
@@ -275,8 +323,7 @@ void MainMenu::renderCounters(Screen& screen) {
 
 
 void MainMenu::removeCounters() {
-    if (transitionState == TransitionState::NONE ||
-            transitionState == TransitionState::END) {
+    if (transitionState == TransitionState::NONE) {
         if (counterTextureLeft) {
             SDL_DestroyTexture(counterTextureLeft);
             counterTextureLeft = nullptr;
@@ -287,7 +334,7 @@ void MainMenu::removeCounters() {
             counterTextureRight = nullptr;
         }
 
-        if (leftWinner == -1 && counterWinner) {
+        if (counterWinner) {
             SDL_DestroyTexture(counterWinner);
             counterWinner = nullptr;
         }
@@ -303,12 +350,11 @@ MenuEvent MainMenu::handleEvents(Screen& screen) {
 }
 
 
-
 MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) {
     switch(event.type) {
         case SDL_KEYDOWN:
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && 
-                transitionState == TransitionState::NONE) {
+                    transitionState == TransitionState::NONE) {
                 toReturn = MenuEvent::TO_RATING_SCREEN;
                 startTransitionOut();
             }
@@ -324,18 +370,18 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
 
             // Check if it is in a rect
             // Don't restart transition if it is running
-            if (transitionState != TransitionState::FADE_IN && transitionState != TransitionState::FADE_OUT) {
+            if (transitionState == TransitionState::NONE) {
                 if (SDL_PointInRect(&mousepoint, &leftBorders)) {
+                    toReturn = MenuEvent::NONE;
                     leftWins();
-                    setupCounters(std::to_string(recordLeft.wins), std::to_string(recordRight.wins), screen);
+                    setupCounters(screen);
                     startTransitionOut();
-                    toReturn = MenuEvent::TO_MAIN_NEXT;
                 }
                 else if (SDL_PointInRect(&mousepoint, &rightBorders)) {
+                    toReturn = MenuEvent::NONE;
                     rightWins();
-                    setupCounters(std::to_string(recordLeft.wins), std::to_string(recordRight.wins), screen);
+                    setupCounters(screen);
                     startTransitionOut();
-                    toReturn = MenuEvent::TO_MAIN_NEXT;
                 }
             }
 
@@ -345,15 +391,11 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
     return MenuEvent::NONE;
 }
 
-void MainMenu::update(const Screen& screen) {
+void MainMenu::update(Screen& screen) {
     // For proper positioning, get current size of the window
     // width and height
-    int windowX, windowY;
-    screen.getSize(windowX, windowY);
-
-    // Calculate the sizes for that borders
-    boxW = static_cast<int>(500.0f / 1280 * windowX); 
-    boxH = static_cast<int>(500.0f / 720 * windowY);
+    updateWindowSize(screen);
+    updateBorders();
 
     // Draw label
 
@@ -365,15 +407,15 @@ void MainMenu::update(const Screen& screen) {
     rectLabel.y = 10;
 
     // Place in the middle of the window int terms of X
-    rectLabel.x = windowX / 2 - rectLabel.w / 2;
+    rectLabel.x = windowWidth / 2 - rectLabel.w / 2;
 
 
     // Draw central line
 
     // Coords
-    lineX1 = lineX2 = windowX / 2;
+    lineX1 = lineX2 = windowWidth / 2;
     lineY1 = rectLabel.y + rectLabel.h + 10;
-    lineY2 = windowY - 10;
+    lineY2 = windowHeight - 10;
     // 10 and -10 are margins from edges
 
     // Draw pictures
@@ -393,8 +435,8 @@ void MainMenu::update(const Screen& screen) {
         // height calculated from the formula of ratio
         rectLeft.h = 1.0f * boxW / ratio;
     
-        rectLeft.x = windowX / 2 - lineMargin - boxW;
-        rectLeft.y = windowY / 2 - rectLeft.h / 2;
+        rectLeft.x = windowWidth / 2 - lineMargin - boxW;
+        rectLeft.y = windowHeight / 2 - rectLeft.h / 2;
     }
     else {
         // height - full height of the box
@@ -402,8 +444,8 @@ void MainMenu::update(const Screen& screen) {
         // width calculated from the formula of ratio
         rectLeft.w = ratio * boxH;
 
-        rectLeft.y = windowY / 2 - boxH / 2;
-        rectLeft.x = windowX / 2 - lineMargin - boxW / 2 - rectLeft.w / 2;
+        rectLeft.y = windowHeight / 2 - boxH / 2;
+        rectLeft.x = windowWidth / 2 - lineMargin - boxW / 2 - rectLeft.w / 2;
     }
 
     // Draw another picture
@@ -422,8 +464,8 @@ void MainMenu::update(const Screen& screen) {
         // by ratio formula
         rectRight.h = 1.0f * boxW / ratio;
     
-        rectRight.x = windowX / 2 + 60;
-        rectRight.y = windowY / 2 - rectRight.h / 2;
+        rectRight.x = windowWidth / 2 + 60;
+        rectRight.y = windowHeight / 2 - rectRight.h / 2;
     }
     else {
         // height - full height of the box
@@ -431,25 +473,14 @@ void MainMenu::update(const Screen& screen) {
         // by ratio formula
         rectRight.w = ratio * boxH;
 
-        rectRight.y = windowY / 2 - boxH / 2;
-        rectRight.x = windowX / 2 + 60 + boxW / 2 - rectRight.w / 2;
+        rectRight.y = windowHeight / 2 - boxH / 2;
+        rectRight.x = windowWidth / 2 + 60 + boxW / 2 - rectRight.w / 2;
     }
 
-    // Draw borders
 
-    leftBorders = SDL_Rect {
-        windowX/2 - boxW - 60, 
-        windowY / 2 - boxH / 2,
-        boxW,
-        boxH,
-    };
-
-    rightBorders = SDL_Rect {
-        windowX/2 + 60, 
-        windowY / 2 - boxH / 2,
-        boxW,
-        boxH,
-    };
+    if (transitionState == TransitionState::CHANGE) {
+        getRandomDouble(screen);
+    }
 
     updateTransitionIn();
     updateTransitionOut();
@@ -475,7 +506,8 @@ void MainMenu::render(Screen& screen) {
     // Print pictures
     if (transitionState == TransitionState::FADE_IN)
         renderTransitionIn();
-    else if (transitionState == TransitionState::FADE_OUT)
+    else if (transitionState == TransitionState::FADE_OUT ||
+            transitionState == TransitionState::FADE_OUT_END)
         renderTransitionOut();
     screen.putTexturedRect(rectLeft.x, rectLeft.y, rectLeft.w, rectLeft.h, textureLeft);
     screen.putTexturedRect(rectRight.x, rectRight.y, rectRight.w, rectRight.h, textureRight);
@@ -506,27 +538,42 @@ void MainMenu::render(Screen& screen) {
 
 
 void MainMenu::leftWins() {
-    recordLeft.wins++;
-    recordLeft.total++;
-    recordRight.total++;
+    pictures[currentLeft].wins++;
+    pictures[currentLeft].total++;
+    pictures[currentRight].total++;
 
     leftWinner = 1;
 }
 
 
 void MainMenu::rightWins() {
-    recordRight.wins++;
-    recordRight.total++;
-    recordLeft.total++;
+    pictures[currentRight].wins++;
+    pictures[currentRight].total++;
+    pictures[currentLeft].total++;
 
     leftWinner = 0;
 }
 
 
 MainMenu::~MainMenu() {
-    SDL_DestroyTexture(textureRight);
-    SDL_DestroyTexture(textureLeft);
-    SDL_DestroyTexture(textureLabel);
+    if (textureLeft)
+        SDL_DestroyTexture(textureLeft);
 
-    TTF_CloseFont(font);
+    if (textureRight)
+        SDL_DestroyTexture(textureRight);
+
+    if (textureLabel)
+        SDL_DestroyTexture(textureLabel);
+
+    if (counterTextureLeft)
+        SDL_DestroyTexture(counterTextureLeft);
+
+    if (counterTextureRight)
+        SDL_DestroyTexture(counterTextureRight);
+
+    if (counterWinner)
+        SDL_DestroyTexture(counterWinner);
+
+    if (font)
+        TTF_CloseFont(font);
 }

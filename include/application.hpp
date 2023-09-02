@@ -26,11 +26,10 @@ class Application {
     std::unique_ptr<BaseMenu> currentMenu;
     
     // Random integer generation
-    std::mt19937 gen;
-    std::uniform_int_distribution<int> dist;
+    // std::mt19937 gen;
+    // std::uniform_int_distribution<int> dist;
 
     std::vector<PictureRecord> pictures;
-    std::vector<std::string> pathPictures;
 
     int lastLeft, lastRight;
 

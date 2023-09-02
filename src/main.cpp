@@ -13,5 +13,7 @@ int main() {
         "fonts/MONOFONT.TTF"
     );
 
-    return app.run();
+
+    int result = app.run();
+    return result;
 }

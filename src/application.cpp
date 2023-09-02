@@ -16,10 +16,7 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
 
     // Setup main paths
     pathToPictures(pathToPictures),
-    pathToFont(pathToFont),
-
-    // Setup random generation
-    gen(std::random_device()()){
+    pathToFont(pathToFont) {
     
     // Get all the current pictures in the directory
     pictures.clear();
@@ -28,13 +25,16 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
                 entry.path().extension().string() == ".jpeg" ||
                 entry.path().extension().string() == ".png" ||
                 entry.path().extension().string() == ".bmp") {
-            pictures.push_back(PictureRecord{entry.path().filename().string(), 0, 0});
-            pathPictures.push_back(entry.path().string());
+            pictures.push_back(PictureRecord{
+                entry.path().filename().string(), 
+                0,
+                0,
+                entry.path().string()
+            });
         }
 
     }
-    lastLeft = -1;
-    lastRight = -1;
+
     // Start from main menu
     switchToMain();
 }
@@ -61,15 +61,9 @@ void Application::update() {
         case MenuEvent::EXIT:
             isRunning = false;
             break;
-
-        case MenuEvent::TO_MAIN_NEXT:
-            switchToMain();
-            break;
-
+        
         // Main screen command
         case MenuEvent::TO_MAIN_SCREEN:
-            lastLeft = -1;
-            lastRight = -1;
             switchToMain();
             break;
 
@@ -94,27 +88,11 @@ void Application::render() {
 
 
 void Application::switchToMain() {
-    // from 0 to size - 1
-    dist = std::uniform_int_distribution<>(0, pictures.size() - 1);
-    int left = dist(gen);
-
-    // from first to first - 1 (cycle)
-    dist = std::uniform_int_distribution<>(1, pictures.size() - 1);
-    int right = (left + dist(gen)) % (pictures.size());
-
     currentMenu = std::make_unique<MainMenu>(
         screen,
-        pathToFont,
-        pictures[left],
-        pictures[right],
-        pathPictures[left],
-        pathPictures[right],
-        (lastLeft == -1)? "" : std::to_string(pictures[lastLeft].wins),
-        (lastRight== -1)? "" :std::to_string(pictures[lastRight].wins)
+        pictures,
+        pathToFont
     );
-
-    lastLeft = left;
-    lastRight = right;
 }
 
 

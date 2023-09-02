@@ -71,7 +71,7 @@ public:
 
     virtual MenuEvent handleSpecificEvent(const SDL_Event& event, Screen& screen) override;
 
-    virtual void update(const Screen& screen) override;
+    virtual void update(Screen& screen) override;
 
     virtual void render(Screen& screen) override;
 

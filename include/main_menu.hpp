@@ -6,11 +6,18 @@
 #include "picture_record.hpp"
 #include "transition_state.hpp"
 
+// C++ standard libraries
+#include <random>
+
 // SDL libraries
 #include <SDL2/SDL_ttf.h>
 
 class MainMenu : public BaseMenu {
+    std::vector<PictureRecord>& pictures;
+    int currentLeft, currentRight;
     int leftWinner;
+
+    int windowWidth, windowHeight;
 
     // Line coords
     int lineX1, lineY1, lineX2, lineY2;
@@ -40,15 +47,20 @@ class MainMenu : public BaseMenu {
     SDL_Rect leftBorders, rightBorders;
     int boxW, boxH;
 
-    // Pictures
-    PictureRecord& recordLeft,& recordRight;
-
     // For app communication
     MenuEvent toReturn;
+
+    std::mt19937 gen;
+    std::uniform_int_distribution<int> dist;
 
     // Transition
     TransitionState transitionState;
     float transitionProgress, delta;
+
+    void getRandomDouble(Screen& screen);
+
+    void updateWindowSize(const Screen& screen);
+    void updateBorders();
 
     // Starts transition to another menu
     void startTransitionIn();
@@ -60,7 +72,7 @@ class MainMenu : public BaseMenu {
     void updateTransitionOut();
 
     // Counter indicates amount of wins
-    void setupCounters(std::string counterLeft, std::string counterRight, Screen& screen);
+    void setupCounters(Screen& screen);
     void updateCounters();
 
     // Changes opacity of the pictures and moves them down
@@ -85,9 +97,7 @@ class MainMenu : public BaseMenu {
 
     void removeCounters();
 public:
-    MainMenu(Screen& screen, std::string& pathToFont, PictureRecord& recordLeft, PictureRecord& recordRight, 
-                std::string& pathToPicLeft, std::string& pathToPicRight,
-                std::string lastLeft, std::string lastRight);
+    MainMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string& pathToFont);
     virtual MenuEvent handleEvents(Screen& screen) override;
 
     // Obligatory implementation of a successor
@@ -95,7 +105,7 @@ public:
     virtual MenuEvent handleSpecificEvent(const SDL_Event& event, Screen& screen) override; 
 
     // Update changes of the menu
-    virtual void update(const Screen& screen) override;
+    virtual void update(Screen& screen) override;
 
     // Render menu
     virtual void render(Screen& scrern) override;

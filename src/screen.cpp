@@ -128,5 +128,6 @@ Screen::~Screen() {
     SDL_DestroyWindow(window);
 
     IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
 }

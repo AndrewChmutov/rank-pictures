@@ -18,7 +18,7 @@ public:
     virtual MenuEvent handleSpecificEvent(const SDL_Event& event, Screen& screen) = 0;
 
     // Update menu
-    virtual void update(const Screen& screen);
+    virtual void update(Screen& screen);
 
     // Render menu
     virtual void render(Screen& screen);

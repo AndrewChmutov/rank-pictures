@@ -175,7 +175,7 @@ void RankMenu::updateTransitionDefaultOut() {
 }
 
 
-void RankMenu::update(const Screen &screen) {
+void RankMenu::update(Screen &screen) {
     int windowX, windowY;
     screen.getSize(windowX, windowY);
 

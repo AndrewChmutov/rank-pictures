@@ -42,6 +42,6 @@ MenuEvent BaseMenu::handleEvents(Screen& screen) {
     return MenuEvent::NONE;
 }
 
-void BaseMenu::update(const Screen& screen) {}
+void BaseMenu::update(Screen& screen) {}
 
 void BaseMenu::render(Screen& screen) {}
