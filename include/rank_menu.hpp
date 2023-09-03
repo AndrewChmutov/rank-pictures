@@ -13,7 +13,7 @@
 
 class RankMenu : public BaseMenu {
     // Font fot labels
-    std::string pathFont;
+    std::string pathToFont;
 
     // Name
     int nameFont;
@@ -46,11 +46,15 @@ class RankMenu : public BaseMenu {
     TransitionState transitionState;
     float transitionProgress, delta;
 
-    PictureRecord& picture;
+    std::vector<PictureRecord>& pictures;
     int index, size;
 
     MenuEvent eventTransition;
     MenuEvent toReturn;
+
+    void loadName(Screen& screen);
+    void loadPicture(Screen& screen);
+    void loadWins(Screen& screen);
 
     void startTransitionIn();
     void startTransitionOut();
@@ -65,7 +69,7 @@ class RankMenu : public BaseMenu {
     void renderTransitionOut();
 
 public:
-    RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event);
+    RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string pathToFont);
 
     virtual MenuEvent handleEvents(Screen& screen) override;
 

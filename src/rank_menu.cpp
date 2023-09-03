@@ -6,32 +6,34 @@
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
+#include <SDL_surface.h>
 #include <SDL_ttf.h>
 #include <string>
 
 
-RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, std::string path, std::string pathToFont, MenuEvent event) : 
-        picture(picture), 
+RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string pathToFont) : 
+        pictures(pictures), 
+        index(0),
         transitionState(TransitionState::FADE_IN),
-        index(index),
-        size(size),
         displacement(1.0f),
         nameFont(20),
         otherFont(13),
-        pathFont(pathToFont),
-        eventTransition(event) {
+        pathToFont(pathToFont) {
+    
+    loadName(screen);
+    loadPicture(screen);
+    loadWins(screen);
 
-    SDL_Surface* temp;
+    startTransitionIn();
+}
 
-    temp = IMG_Load((path + "/" + picture.name).c_str());
-    pictureTexture = screen.toTexture(temp);
-    SDL_FreeSurface(temp);
 
+void RankMenu::loadName(Screen& screen) {
     TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
 
-    temp = TTF_RenderText_Shaded(
+    SDL_Surface* temp = TTF_RenderText_Shaded(
         font, 
-        picture.name.c_str(), 
+        pictures[index].name.c_str(), 
         {0, 0, 0, 255}, 
         {255, 255, 255, 0}
     );
@@ -39,11 +41,23 @@ RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, 
     nameTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
     TTF_CloseFont(font);
+}
 
 
-    font = TTF_OpenFont(pathToFont.c_str(), 50);
-    winsText = "Wins: " + std::to_string(picture.wins);
-    temp = TTF_RenderText_Shaded(
+void RankMenu::loadPicture(Screen& screen) {
+    SDL_Surface* temp;
+
+    temp = IMG_Load(pictures[index].path.c_str());
+    pictureTexture = screen.toTexture(temp);
+    SDL_FreeSurface(temp);
+}
+
+
+void RankMenu::loadWins(Screen& screen) {
+    TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
+    winsText = "Wins: " + std::to_string(pictures[index].wins);
+
+    SDL_Surface* temp = TTF_RenderText_Shaded(
         font, 
         winsText.c_str(),
         {0, 0, 0, 255}, 
@@ -53,8 +67,6 @@ RankMenu::RankMenu(Screen& screen, PictureRecord& picture, int index, int size, 
     winsTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
     TTF_CloseFont(font);
-
-    startTransitionIn();
 }
 
 
@@ -180,7 +192,7 @@ void RankMenu::update(Screen &screen) {
     screen.getSize(windowX, windowY);
 
     nameRect.y = 10;
-    nameRect.w = nameFont * picture.name.size();
+    nameRect.w = nameFont * pictures[index].name.size();
     nameRect.h = static_cast<int>(2.4 * nameFont);
     nameRect.x = windowX / 2 - nameRect.w / 2;
     
