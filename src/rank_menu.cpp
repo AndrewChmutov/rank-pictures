@@ -6,6 +6,7 @@
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
+#include <SDL_render.h>
 #include <SDL_surface.h>
 #include <SDL_ttf.h>
 #include <string>
@@ -24,7 +25,7 @@ RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
         winsTexture(nullptr),
         winrateTexture(nullptr),
         totalTexture(nullptr),
-        pictureTexture(nullptr){
+        pictureTexture(nullptr) {
     
     loadEntities(screen);
 
@@ -35,22 +36,13 @@ RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
 void RankMenu::loadEntities(Screen& screen) {
     loadName(screen);
     loadPicture(screen);
+    loadIndex(screen);
     loadWins(screen);
 }
 
 
 void RankMenu::loadName(Screen& screen) {
-    TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
-
-    SDL_Surface* temp = TTF_RenderText_Blended(
-        font, 
-        pictures[index].name.c_str(), 
-        {255, 255, 255, 255}
-    );
-
-    nameTexture = screen.toTexture(temp);
-    SDL_FreeSurface(temp);
-    TTF_CloseFont(font);
+    loadLabel(screen, &nameTexture, pictures[index].name);
 }
 
 
@@ -62,23 +54,57 @@ void RankMenu::loadPicture(Screen& screen) {
 
 
 void RankMenu::loadIndex(Screen& screen) {
-
+    indexText = "#" + std::to_string(index + 1);
+    loadLabel(screen, &indexTexture, indexText);
 }
 
 
 void RankMenu::loadWins(Screen& screen) {
-    TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
     winsText = "Wins: " + std::to_string(pictures[index].wins);
+    loadLabel(screen, &winsTexture, winsText);
+}
+
+
+void RankMenu::loadWinrate(Screen& screen) {
+    float winrate = 1.0f * pictures[index].wins / pictures[index].total;
+    winrateText = "Winrate: " + std::to_string(winrate) + "%";
+    loadLabel(screen, &winrateTexture, winrateText);
+}
+
+
+void RankMenu::loadTotal(Screen& screen) {
+    loadLabel(screen, &totalTexture, "Total: " + std::to_string(pictures[index].total));
+}
+
+
+void RankMenu::loadLabel(Screen& screen, SDL_Texture** tempTexture, const std::string& toShow) {
+    TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
 
     SDL_Surface* temp = TTF_RenderText_Blended(
         font, 
-        winsText.c_str(),
+        toShow.c_str(),
         {255, 255, 255, 255}
     );
 
-    winsTexture = screen.toTexture(temp);
+    *tempTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
     TTF_CloseFont(font);
+}
+
+
+void RankMenu::freeTexture(SDL_Texture** texture) {
+    if (*texture)
+        SDL_DestroyTexture(*texture);
+}
+
+
+void RankMenu::freeEntities() {
+    freeTexture(&nameTexture);
+    freeTexture(&pictureTexture);
+    freeTexture(&indexTexture);
+    freeTexture(&winsTexture);
+    freeTexture(&winrateTexture);
+    freeTexture(&totalTexture);
 }
 
 
@@ -243,10 +269,18 @@ void RankMenu::update(Screen &screen) {
         boxH
     };
 
+
+    indexRect = SDL_Rect {
+        borders.x + borders.w + 20,
+        borders.y,
+        static_cast<int>(nameFont * indexText.size()),
+        static_cast<int>(2.4f * nameFont)
+    };
+
     
     winsRect = SDL_Rect {
         borders.x + borders.w + 20,
-        borders.y + static_cast<int>(0.1f * borders.h),
+        indexRect.y + indexRect.h + 5,
         static_cast<int>(otherFont * winsText.size()),
         static_cast<int>(2.4f * otherFont)
     };
@@ -291,6 +325,15 @@ void RankMenu::render(Screen& screen) {
 
 
     screen.putTexturedRect(
+        indexRect.x,
+        indexRect.y,
+        indexRect.w,
+        indexRect.h,
+        indexTexture
+    );
+
+
+    screen.putTexturedRect(
         winsRect.x, 
         winsRect.y, 
         winsRect.w, 
@@ -321,7 +364,5 @@ void RankMenu::render(Screen& screen) {
 
 
 RankMenu::~RankMenu() {
-    SDL_DestroyTexture(winsTexture);
-    SDL_DestroyTexture(nameTexture);
-    SDL_DestroyTexture(pictureTexture);
+    freeEntities();
 }

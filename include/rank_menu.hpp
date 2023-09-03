@@ -10,6 +10,7 @@
 // SDL libraries
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL_render.h>
 
 class RankMenu : public BaseMenu {
     // Font fot labels
@@ -64,13 +65,12 @@ class RankMenu : public BaseMenu {
     void loadIndex(Screen& screen);
     void loadWins(Screen& screen);
     void loadWinrate(Screen& screen);
+    void loadTotal(Screen& screen);
 
+    void loadLabel(Screen& screen, SDL_Texture** tempTexture, const std::string& toShow);
+
+    void freeTexture(SDL_Texture** texture);
     void freeEntities();
-    void freeName();
-    void freePicture();
-    void freeIndex();
-    void freeWins();
-    void freeWinrate();
 
     void startTransitionIn();
     void startTransitionOut();
