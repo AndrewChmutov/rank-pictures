@@ -18,24 +18,34 @@ RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
         displacement(1.0f),
         nameFont(20),
         otherFont(13),
-        pathToFont(pathToFont) {
+        pathToFont(pathToFont),
+        nameTexture(nullptr),
+        indexTexture(nullptr),
+        winsTexture(nullptr),
+        winrateTexture(nullptr),
+        totalTexture(nullptr),
+        pictureTexture(nullptr){
     
+    loadEntities(screen);
+
+    startTransitionIn();
+}
+
+
+void RankMenu::loadEntities(Screen& screen) {
     loadName(screen);
     loadPicture(screen);
     loadWins(screen);
-
-    startTransitionIn();
 }
 
 
 void RankMenu::loadName(Screen& screen) {
     TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
 
-    SDL_Surface* temp = TTF_RenderText_Shaded(
+    SDL_Surface* temp = TTF_RenderText_Blended(
         font, 
         pictures[index].name.c_str(), 
-        {0, 0, 0, 255}, 
-        {255, 255, 255, 0}
+        {255, 255, 255, 255}
     );
 
     nameTexture = screen.toTexture(temp);
@@ -45,11 +55,14 @@ void RankMenu::loadName(Screen& screen) {
 
 
 void RankMenu::loadPicture(Screen& screen) {
-    SDL_Surface* temp;
-
-    temp = IMG_Load(pictures[index].path.c_str());
+    SDL_Surface* temp = IMG_Load(pictures[index].path.c_str());
     pictureTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
+}
+
+
+void RankMenu::loadIndex(Screen& screen) {
+
 }
 
 
@@ -57,11 +70,10 @@ void RankMenu::loadWins(Screen& screen) {
     TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
     winsText = "Wins: " + std::to_string(pictures[index].wins);
 
-    SDL_Surface* temp = TTF_RenderText_Shaded(
+    SDL_Surface* temp = TTF_RenderText_Blended(
         font, 
         winsText.c_str(),
-        {0, 0, 0, 255}, 
-        {255, 255, 255, 0}
+        {255, 255, 255, 255}
     );
 
     winsTexture = screen.toTexture(temp);
@@ -98,7 +110,6 @@ void RankMenu::startTransitionIn() {
     delta = 0.005f;
 
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
-    SDL_SetTextureBlendMode(winsTexture, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -108,7 +119,6 @@ void RankMenu::startTransitionOut() {
     delta = 0.002f;
 
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
-    SDL_SetTextureBlendMode(winsTexture, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -127,7 +137,6 @@ void RankMenu::updateTransitionIn() {
         transitionState = TransitionState::NONE;
 
         SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_NONE);
-        SDL_SetTextureBlendMode(winsTexture, SDL_BLENDMODE_NONE);
     }
 }
 
@@ -290,6 +299,14 @@ void RankMenu::render(Screen& screen) {
     );
 
 
+    screen.putTexturedRect(
+        pictureRect.x, 
+        pictureRect.y, 
+        pictureRect.w,
+        pictureRect.h,
+        pictureTexture
+    );
+
     screen.putRect(
         borders.x,
         borders.y,
@@ -298,13 +315,6 @@ void RankMenu::render(Screen& screen) {
         128, 128, 128
     );
 
-    screen.putTexturedRect(
-        pictureRect.x, 
-        pictureRect.y, 
-        pictureRect.w,
-        pictureRect.h,
-        pictureTexture
-    );
 
     screen.show();
 }

@@ -22,6 +22,10 @@ class RankMenu : public BaseMenu {
 
     int otherFont;
 
+    SDL_Rect indexRect;
+    std::string indexText;
+    SDL_Texture* indexTexture;
+
     // Wins
     SDL_Rect winsRect;
     std::string winsText;
@@ -29,10 +33,12 @@ class RankMenu : public BaseMenu {
 
     // Winrate
     SDL_Rect winrateRect;
+    std::string winrateText;
     SDL_Texture* winrateTexture;
 
     // Total
     SDL_Rect totalRect;
+    std::string totalText;
     SDL_Texture* totalTexture;
 
     // Picture
@@ -52,9 +58,19 @@ class RankMenu : public BaseMenu {
     MenuEvent eventTransition;
     MenuEvent toReturn;
 
+    void loadEntities(Screen& screen);
     void loadName(Screen& screen);
     void loadPicture(Screen& screen);
+    void loadIndex(Screen& screen);
     void loadWins(Screen& screen);
+    void loadWinrate(Screen& screen);
+
+    void freeEntities();
+    void freeName();
+    void freePicture();
+    void freeIndex();
+    void freeWins();
+    void freeWinrate();
 
     void startTransitionIn();
     void startTransitionOut();
