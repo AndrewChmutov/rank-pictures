@@ -11,9 +11,12 @@
 class Screen {
     SDL_Window* window;
     SDL_Renderer* renderer;
+    SDL_Texture* background;
 
 public:
     Screen(int width, int height, std::string windowName);
+
+    void setBackground(std::string pathToBackground);
 
     // Get width and hight by reference
     void getSize(int& w, int& h) const;
@@ -30,7 +33,7 @@ public:
 
     // Set the background
     // Usually at the beginning of frame rendering
-    void putBackground(uint8_t r = 255, uint8_t g = 255, uint8_t b = 255, uint8_t opacity = 255);
+    void putBackground(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t opacity = 255);
 
     // Into given rectangle, put the given texture
     void putTexturedRect(int x, int y, int w, int h, SDL_Texture* texture);

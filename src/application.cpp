@@ -35,6 +35,8 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
 
     }
 
+    screen.setBackground("./background.png");
+
     // Start from main menu
     switchToMain();
 }

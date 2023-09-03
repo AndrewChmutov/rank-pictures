@@ -42,11 +42,10 @@ MainMenu::MainMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
     text = "Choose the better one!";
 
     //  Get texture of a font
-    SDL_Surface* temp = TTF_RenderText_Shaded(
+    SDL_Surface* temp = TTF_RenderText_Blended(
         font,
         text.c_str(),
-        {0, 0, 0, 255},
-        {255, 255, 255, 0}
+        {255, 255, 255, 255}
     );
     textureLabel = screen.toTexture(temp);
     SDL_FreeSurface(temp);
@@ -165,30 +164,27 @@ void MainMenu::setupCounters(Screen& screen) {
     }
 
     // // Get shaders for rendering counters
-    SDL_Surface* temp = TTF_RenderText_Shaded(
+    SDL_Surface* temp = TTF_RenderText_Blended(
         font,
         counterLeft.c_str(),
-        {0, 0, 0, 255},
-        {255, 255, 255, 0}
+        {255, 255, 255, 255}
     );
     counterTextureLeft = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
-    temp = TTF_RenderText_Shaded(
+    temp = TTF_RenderText_Blended(
         font,
         counterRight.c_str(),
-        {0, 0, 0, 255},
-        {255, 255, 255, 0}
+        {255, 255, 255, 255}
     );
     counterTextureRight = screen.toTexture(temp);
     SDL_FreeSurface(temp);
 
     if (leftWinner != -1) {
-        temp = TTF_RenderText_Shaded(
+        temp = TTF_RenderText_Blended(
             font,
             leftWinner? counterLeft.c_str() : counterRight.c_str(),
-            {0, 240, 0, 255},
-            {255, 255, 255, 0}
+            {0, 240, 0, 255}
         );
         counterWinner = screen.toTexture(temp);
         SDL_FreeSurface(temp);

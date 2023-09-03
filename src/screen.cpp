@@ -7,7 +7,7 @@
 #include <SDL_ttf.h>
 
 
-Screen::Screen(int width, int height, std::string windowName) {
+Screen::Screen(int width, int height, std::string windowName) : background(nullptr){
     // Initialize different subsystems
     if (SDL_Init(SDL_INIT_VIDEO < 0)) {
         fprintf(stderr, "%s\n", "Could not initialize video!");
@@ -47,6 +47,16 @@ Screen::Screen(int width, int height, std::string windowName) {
 }
 
 
+void Screen::setBackground(std::string pathToBackground) {
+    if (background)
+        SDL_DestroyTexture(background);
+
+    SDL_Surface* temp = IMG_Load(pathToBackground.c_str());
+    background = toTexture(temp);
+    SDL_FreeSurface(temp);
+}
+
+
 SDL_Texture* Screen::toTexture(SDL_Surface* surface) {
     return SDL_CreateTextureFromSurface(renderer, surface);
 }
@@ -73,11 +83,15 @@ void Screen::maximize(int& w, int& h) {
 
 
 void Screen::putBackground(uint8_t r, uint8_t g, uint8_t b, uint8_t opacity) {
-    // Color for background
-    SDL_SetRenderDrawColor(renderer, r, g, b, opacity);
+    if (background)
+        SDL_RenderCopy(renderer, background, NULL, NULL);
+    else {
+        // Color for background
+        SDL_SetRenderDrawColor(renderer, r, g, b, opacity);
 
-    // Render background
-    SDL_RenderClear(renderer);
+        // Render background
+        SDL_RenderClear(renderer);
+    }
 }
 
 
@@ -126,6 +140,9 @@ void Screen::putRect(int x1, int y1, int x2, int y2,
 Screen::~Screen() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+
+    if (background)
+        SDL_DestroyTexture(background);
 
     IMG_Quit();
     TTF_Quit();
