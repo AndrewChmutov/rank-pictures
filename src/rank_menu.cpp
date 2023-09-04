@@ -48,6 +48,8 @@ void RankMenu::loadName(Screen& screen) {
 
 
 void RankMenu::loadPicture(Screen& screen) {
+    freeTexture(&pictureTexture);
+
     SDL_Surface* temp = IMG_Load(pictures[index].path.c_str());
     pictureTexture = screen.toTexture(temp);
     SDL_FreeSurface(temp);
@@ -79,6 +81,8 @@ void RankMenu::loadTotal(Screen& screen) {
 
 
 void RankMenu::loadLabel(Screen& screen, SDL_Texture** tempTexture, const std::string& toShow) {
+    freeTexture(tempTexture);
+
     TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
 
     SDL_Surface* temp = TTF_RenderText_Blended(
@@ -124,10 +128,46 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
                 toReturn = MenuEvent::TO_MAIN_SCREEN;
                 startTransitionOut(TransitionState::FADE_OUT);
             }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_LEFT &&
+                    transitionState == TransitionState::NONE) {
+                toLeft();
+            }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT &&
+                    transitionState == TransitionState::NONE) {
+                toRight();
+            }
 
     }
 
     return MenuEvent::NONE;
+}
+
+
+void RankMenu::toLeft() {
+    if (index <= 0) {
+        index = 0;
+        return;
+    }
+
+    transitionState = TransitionState::LEFT_OUT;
+    transitionProgress = 0.0f;
+    delta = 0.05f;
+    
+    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+}
+
+
+void RankMenu::toRight() {
+    if (index >= pictures.size() - 1) {
+        index = pictures.size() - 1;
+        return;
+    }
+
+    transitionState = TransitionState::RIGHT_OUT;
+    transitionProgress = 0.0f;
+    delta = 0.05f;
+
+    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -149,6 +189,29 @@ void RankMenu::startTransitionOut(TransitionState state) {
 }
 
 
+void RankMenu::startTransitionLeftIn() {
+    transitionState = TransitionState::CHANGE;
+    transitionProgress = 0.0f;
+    delta = 0.05f;
+
+    index = std::max(0, index - 1);
+
+    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+}
+
+
+
+void RankMenu::startTransitionRightIn() {
+    transitionState = TransitionState::CHANGE;
+    transitionProgress = 0.0f;
+    delta = 0.03f;
+
+    index = std::min(static_cast<int>(pictures.size() - 1), index + 1);
+
+    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+}
+
+
 void RankMenu::updateTransitionIn() {
     if (transitionState != TransitionState::FADE_IN && 
             transitionState != TransitionState::LEFT_IN &&
@@ -157,13 +220,18 @@ void RankMenu::updateTransitionIn() {
 
     transitionProgress += delta;
 
-    if (false) {}
+    if (transitionState == TransitionState::LEFT_IN) {
+        updateTransitionLeftIn();
+    }
+    else if (transitionState == TransitionState::RIGHT_IN) {
+        updateTransitionRightIn();
+    }
     else
         updateTransitionDefaultIn();  
 
     if (transitionProgress >= 1.0f) {
-        transitionProgress = 1.0f;
         transitionState = TransitionState::NONE;
+        transitionProgress = 1.0f;
 
         SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_NONE);
     }
@@ -189,6 +257,11 @@ void RankMenu::updateTransitionDefaultIn() {
 }
 
 
+void RankMenu::updateTransitionLeftIn() {}
+
+void RankMenu::updateTransitionRightIn() {}
+
+
 void RankMenu::updateTransitionOut() {
     if (transitionState != TransitionState::FADE_OUT && 
             transitionState != TransitionState::LEFT_OUT &&
@@ -197,13 +270,24 @@ void RankMenu::updateTransitionOut() {
 
     transitionProgress += delta;
 
-    if (false) {}
+    if (transitionState == TransitionState::LEFT_OUT) {
+        updateTransitionLeftOut();
+    }
+    else if (transitionState == TransitionState::RIGHT_OUT) {
+        updateTransitionRightOut();
+    }
     else
         updateTransitionDefaultOut();
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
-        transitionState = TransitionState::END;
+
+        if (transitionState == TransitionState::LEFT_OUT)
+            startTransitionLeftIn();
+        else if (transitionState == TransitionState::RIGHT_OUT)
+            startTransitionRightIn();
+        else
+            transitionState = TransitionState::END;
     }
 }
 
@@ -225,6 +309,12 @@ void RankMenu::updateTransitionDefaultOut() {
         winsRect.x += acceleration * t * t / 2;
     }
 }
+
+
+void RankMenu::updateTransitionLeftOut() {}
+
+
+void RankMenu::updateTransitionRightOut() {}
 
 
 void RankMenu::update(Screen &screen) {
@@ -291,8 +381,26 @@ void RankMenu::update(Screen &screen) {
     };
 
 
+    auto previousState = transitionState;
     updateTransitionIn();
     updateTransitionOut();
+
+    updateInfo(screen, previousState);
+}
+
+
+void RankMenu::updateInfo(Screen& screen, TransitionState previous) {
+    if (transitionState != TransitionState::CHANGE)
+        return;
+
+    loadEntities(screen);
+    
+    if (previous == TransitionState::LEFT_OUT)
+        transitionState = TransitionState::LEFT_IN;
+    else if (previous == TransitionState::RIGHT_OUT)
+        transitionState = TransitionState::RIGHT_IN;
+    else
+        transitionState = TransitionState::NONE;
 }
 
 

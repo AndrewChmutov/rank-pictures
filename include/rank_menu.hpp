@@ -75,6 +75,9 @@ class RankMenu : public BaseMenu {
     void startTransitionIn(TransitionState state);
     void startTransitionOut(TransitionState state);
 
+    void startTransitionLeftIn();
+    void startTransitionRightIn();
+
     void updateTransitionIn();
     void updateTransitionDefaultIn();
     void updateTransitionLeftIn();
@@ -85,8 +88,13 @@ class RankMenu : public BaseMenu {
     void updateTransitionLeftOut();
     void updateTransitionRightOut();
 
+    void updateInfo(Screen& screen, TransitionState previous);
+
     void renderTransitionIn();
     void renderTransitionOut();
+
+    void toLeft();
+    void toRight();
 
 public:
     RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string pathToFont);
