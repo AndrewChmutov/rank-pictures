@@ -165,7 +165,7 @@ void RankMenu::toRight() {
 
     transitionState = TransitionState::RIGHT_OUT;
     transitionProgress = 0.0f;
-    delta = 0.05f;
+    delta = 0.03f;
 
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
 }
@@ -218,8 +218,6 @@ void RankMenu::updateTransitionIn() {
             transitionState != TransitionState::RIGHT_IN)
         return;
 
-    transitionProgress += delta;
-
     if (transitionState == TransitionState::LEFT_IN) {
         updateTransitionLeftIn();
     }
@@ -228,6 +226,8 @@ void RankMenu::updateTransitionIn() {
     }
     else
         updateTransitionDefaultIn();  
+
+    transitionProgress += delta;
 
     if (transitionProgress >= 1.0f) {
         transitionState = TransitionState::NONE;
@@ -259,7 +259,11 @@ void RankMenu::updateTransitionDefaultIn() {
 
 void RankMenu::updateTransitionLeftIn() {}
 
-void RankMenu::updateTransitionRightIn() {}
+void RankMenu::updateTransitionRightIn() {
+    float acceleration = 2.0f * 2.5f * boxW, t = 1 - transitionProgress;
+    pictureRect.x   += acceleration * t * t / 2;
+    borders.x       += acceleration * t * t / 2;
+}
 
 
 void RankMenu::updateTransitionOut() {
@@ -267,8 +271,6 @@ void RankMenu::updateTransitionOut() {
             transitionState != TransitionState::LEFT_OUT &&
             transitionState != TransitionState::RIGHT_OUT)
         return;
-
-    transitionProgress += delta;
 
     if (transitionState == TransitionState::LEFT_OUT) {
         updateTransitionLeftOut();
@@ -278,6 +280,8 @@ void RankMenu::updateTransitionOut() {
     }
     else
         updateTransitionDefaultOut();
+
+    transitionProgress += delta;
 
     if (transitionProgress >= 1.0f) {
         transitionProgress = 1.0f;
@@ -293,7 +297,7 @@ void RankMenu::updateTransitionOut() {
 
 
 void RankMenu::updateTransitionDefaultOut() {
-    float acceleration = 2.0f * 1.25f * boxW, t = transitionProgress;
+    float acceleration = 2.0f * 1.5 * boxW, t = transitionProgress;
 
     pictureRect.x   -= acceleration * t * t / 2;
     borders.x       -= acceleration * t * t / 2;
@@ -314,7 +318,11 @@ void RankMenu::updateTransitionDefaultOut() {
 void RankMenu::updateTransitionLeftOut() {}
 
 
-void RankMenu::updateTransitionRightOut() {}
+void RankMenu::updateTransitionRightOut() {
+    float acceleration = 2.0f * 1.5f * boxW, t = transitionProgress;
+    pictureRect.x   -= acceleration * t * t / 2;
+    borders.x       -= acceleration * t * t / 2;
+}
 
 
 void RankMenu::update(Screen &screen) {
