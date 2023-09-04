@@ -165,7 +165,7 @@ void RankMenu::toRight() {
 
     transitionState = TransitionState::RIGHT_OUT;
     transitionProgress = 0.0f;
-    delta = 0.03f;
+    delta = 0.05f;
 
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
 }
@@ -204,7 +204,7 @@ void RankMenu::startTransitionLeftIn() {
 void RankMenu::startTransitionRightIn() {
     transitionState = TransitionState::CHANGE;
     transitionProgress = 0.0f;
-    delta = 0.03f;
+    delta = 0.05f;
 
     index = std::min(static_cast<int>(pictures.size() - 1), index + 1);
 
@@ -257,7 +257,11 @@ void RankMenu::updateTransitionDefaultIn() {
 }
 
 
-void RankMenu::updateTransitionLeftIn() {}
+void RankMenu::updateTransitionLeftIn() {
+    float acceleration = 2.0f * 1.5f * boxW, t = 1 - transitionProgress;
+    pictureRect.x   -= acceleration * t * t / 2;
+    borders.x       -= acceleration * t * t / 2;
+}
 
 void RankMenu::updateTransitionRightIn() {
     float acceleration = 2.0f * 2.5f * boxW, t = 1 - transitionProgress;
@@ -315,11 +319,15 @@ void RankMenu::updateTransitionDefaultOut() {
 }
 
 
-void RankMenu::updateTransitionLeftOut() {}
+void RankMenu::updateTransitionLeftOut() {
+    float acceleration = 2.0f * 3.0f * boxW, t = transitionProgress;
+    pictureRect.x   += acceleration * t * t / 2;
+    borders.x       += acceleration * t * t / 2;
+}
 
 
 void RankMenu::updateTransitionRightOut() {
-    float acceleration = 2.0f * 1.5f * boxW, t = transitionProgress;
+    float acceleration = 2.0f * 2.0f * boxW, t = transitionProgress;
     pictureRect.x   -= acceleration * t * t / 2;
     borders.x       -= acceleration * t * t / 2;
 }
