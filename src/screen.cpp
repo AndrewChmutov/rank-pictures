@@ -96,7 +96,6 @@ void Screen::putBackground(uint8_t r, uint8_t g, uint8_t b, uint8_t opacity) {
 
 
 void Screen::show() {
-    SDL_Delay(1);
     SDL_RenderPresent(renderer);
 }
 

@@ -133,7 +133,7 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
 void RankMenu::startTransitionIn() {
     transitionState = TransitionState::FADE_IN;
     transitionProgress = 0.0f;
-    delta = 0.005f;
+    delta = 0.05f;
 
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
 }
@@ -142,7 +142,7 @@ void RankMenu::startTransitionIn() {
 void RankMenu::startTransitionOut() {
     transitionState = TransitionState::FADE_OUT;
     transitionProgress = 0.0f;
-    delta = 0.002f;
+    delta = 0.03f;
 
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
 }

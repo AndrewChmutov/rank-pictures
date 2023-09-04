@@ -113,7 +113,7 @@ void MainMenu::updateBorders() {
 void MainMenu::startTransitionIn() {
     transitionState = TransitionState::FADE_IN;
     transitionProgress = 0.0f;
-    delta = 0.005f;
+    delta = 0.05f;
 
     SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);
@@ -126,7 +126,7 @@ void MainMenu::startTransitionOut() {
     else
         transitionState = TransitionState::FADE_OUT;
     transitionProgress = 0.0f;
-    delta = 0.002f;
+    delta = 0.02f;
 
     SDL_SetTextureBlendMode(textureLeft, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(textureRight, SDL_BLENDMODE_BLEND);

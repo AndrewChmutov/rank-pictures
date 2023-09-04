@@ -8,7 +8,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-
+#include <chrono>
+#include <thread>
 
 Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
     // Setup a screen
@@ -44,10 +45,19 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
 
 int Application::run() {
     isRunning = true;
+    float desiredDelta = 1.0f / 60;
+
 
     while (isRunning) {
+        auto start = std::chrono::high_resolution_clock::now();
         update();
         render();
+        auto finish = std::chrono::high_resolution_clock::now();
+        
+        std::chrono::duration<float> elapsed = finish - start;
+        if (elapsed.count() < desiredDelta) {
+            std::this_thread::sleep_for(std::chrono::duration<float>(desiredDelta - elapsed.count()));
+        }
     }
 
     return 0;
