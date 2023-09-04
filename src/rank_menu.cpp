@@ -244,7 +244,7 @@ void RankMenu::updateTransitionDefaultIn() {
     pictureRect.y   += acceleration * t * t / 2;
     borders.y       += acceleration * t * t / 2;
 
-    acceleration = 2.0f * (10 + nameRect.h);
+    acceleration = 2.0f * (20 + nameRect.h);
 
     nameRect.y -= acceleration * t * t / 2;
 

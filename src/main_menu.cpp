@@ -52,6 +52,7 @@ MainMenu::MainMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
 
     // Get new 2 pictures
     getRandomDouble(screen);
+    transitionState = TransitionState::FADE_IN_FIRST;
 }
 
 
@@ -195,7 +196,8 @@ void MainMenu::setupCounters(Screen& screen) {
 }
 
 void MainMenu::updateTransitionIn() {
-    if (transitionState != TransitionState::FADE_IN)
+    if (transitionState != TransitionState::FADE_IN &&
+            transitionState != TransitionState::FADE_IN_FIRST)
         return;
 
     float acceleration = 2.0f * 1.25f * boxH, t = 1.0f - transitionProgress;
@@ -208,6 +210,11 @@ void MainMenu::updateTransitionIn() {
     rightBorders.y += acceleration * t * t / 2;
 
     updateCounters();
+
+    if (transitionState == TransitionState::FADE_IN_FIRST) {
+        acceleration = 2.0f * (20 + rectLabel.h);        
+        rectLabel.y -= acceleration * t * t / 2;
+    }
 
     transitionProgress += delta;
 
@@ -232,6 +239,12 @@ void MainMenu::updateTransitionOut() {
 
     rectRight.x += 1.25f * boxW - acceleration * t * t / 2;
     rightBorders.x += 1.25f * boxW - acceleration * t * t / 2;
+
+    if (transitionState == TransitionState::FADE_OUT_END) {
+        acceleration = 2.0f * (20 + rectLabel.h);
+        t = transitionProgress;   
+        rectLabel.y -= acceleration * t * t / 2;
+    }
 
     updateCounters();
 
