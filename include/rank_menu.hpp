@@ -72,14 +72,18 @@ class RankMenu : public BaseMenu {
     void freeTexture(SDL_Texture** texture);
     void freeEntities();
 
-    void startTransitionIn();
-    void startTransitionOut();
+    void startTransitionIn(TransitionState state);
+    void startTransitionOut(TransitionState state);
 
     void updateTransitionIn();
     void updateTransitionDefaultIn();
+    void updateTransitionLeftIn();
+    void updateTransitionRightIn();
 
     void updateTransitionOut();
     void updateTransitionDefaultOut();
+    void updateTransitionLeftOut();
+    void updateTransitionRightOut();
 
     void renderTransitionIn();
     void renderTransitionOut();

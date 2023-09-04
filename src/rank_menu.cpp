@@ -3,6 +3,7 @@
 // Custom libraries
 #include "menu_events.hpp"
 #include "picture_record.hpp"
+#include "transition_state.hpp"
 
 // SDL libraries
 #include <SDL2/SDL_image.h>
@@ -29,7 +30,7 @@ RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
     
     loadEntities(screen);
 
-    startTransitionIn();
+    startTransitionIn(TransitionState::FADE_IN);
 }
 
 
@@ -121,7 +122,7 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE &&
                     transitionState == TransitionState::NONE) {
                 toReturn = MenuEvent::TO_MAIN_SCREEN;
-                startTransitionOut();
+                startTransitionOut(TransitionState::FADE_OUT);
             }
 
     }
@@ -130,8 +131,8 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
 }
 
 
-void RankMenu::startTransitionIn() {
-    transitionState = TransitionState::FADE_IN;
+void RankMenu::startTransitionIn(TransitionState state) {
+    transitionState = state;
     transitionProgress = 0.0f;
     delta = 0.05f;
 
@@ -139,8 +140,8 @@ void RankMenu::startTransitionIn() {
 }
 
 
-void RankMenu::startTransitionOut() {
-    transitionState = TransitionState::FADE_OUT;
+void RankMenu::startTransitionOut(TransitionState state) {
+    transitionState = state;
     transitionProgress = 0.0f;
     delta = 0.03f;
 
@@ -149,7 +150,9 @@ void RankMenu::startTransitionOut() {
 
 
 void RankMenu::updateTransitionIn() {
-    if (transitionState != TransitionState::FADE_IN)
+    if (transitionState != TransitionState::FADE_IN && 
+            transitionState != TransitionState::LEFT_IN &&
+            transitionState != TransitionState::RIGHT_IN)
         return;
 
     transitionProgress += delta;
@@ -187,7 +190,9 @@ void RankMenu::updateTransitionDefaultIn() {
 
 
 void RankMenu::updateTransitionOut() {
-    if (transitionState != TransitionState::FADE_OUT)
+    if (transitionState != TransitionState::FADE_OUT && 
+            transitionState != TransitionState::LEFT_OUT &&
+            transitionState != TransitionState::RIGHT_OUT)
         return;
 
     transitionProgress += delta;
@@ -292,7 +297,9 @@ void RankMenu::update(Screen &screen) {
 
 
 void RankMenu::renderTransitionIn() {
-    if (transitionState != TransitionState::FADE_IN)
+    if (transitionState != TransitionState::FADE_IN && 
+            transitionState != TransitionState::LEFT_IN &&
+            transitionState != TransitionState::RIGHT_IN)
         return;
 
     SDL_SetTextureAlphaMod(pictureTexture, static_cast<int>(transitionProgress * 255));
@@ -301,7 +308,9 @@ void RankMenu::renderTransitionIn() {
 
 
 void RankMenu::renderTransitionOut() {
-    if (transitionState != TransitionState::FADE_OUT)
+    if (transitionState != TransitionState::FADE_OUT && 
+            transitionState != TransitionState::LEFT_OUT &&
+            transitionState != TransitionState::RIGHT_OUT)
         return;
 
     SDL_SetTextureAlphaMod(pictureTexture, 255 - static_cast<int>(transitionProgress * 255));
