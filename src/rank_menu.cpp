@@ -10,7 +10,9 @@
 #include <SDL_render.h>
 #include <SDL_surface.h>
 #include <SDL_ttf.h>
+#include <iomanip>
 #include <string>
+#include <sstream>
 
 
 RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string pathToFont) : 
@@ -39,6 +41,7 @@ void RankMenu::loadEntities(Screen& screen) {
     loadPicture(screen);
     loadIndex(screen);
     loadWins(screen);
+    loadWinrate(screen);
 }
 
 
@@ -67,10 +70,16 @@ void RankMenu::loadWins(Screen& screen) {
     loadLabel(screen, &winsTexture, winsText);
 }
 
-
 void RankMenu::loadWinrate(Screen& screen) {
-    float winrate = 1.0f * pictures[index].wins / pictures[index].total;
-    winrateText = "Winrate: " + std::to_string(winrate) + "%";
+    float winrate;
+    if (pictures[index].total == 0)
+        winrate = 0;
+    else
+        winrate = 100.0f * pictures[index].wins / pictures[index].total;
+    
+    std::stringstream ss;
+    ss << "Winrate: " << std::fixed << std::setprecision(2) << winrate << " %";
+    winrateText = ss.str();
     loadLabel(screen, &winrateTexture, winrateText);
 }
 
@@ -249,16 +258,22 @@ void RankMenu::updateTransitionDefaultIn() {
     nameRect.y -= acceleration * t * t / 2;
 
     acceleration = 2 * 0.2f * boxH;
-    if (transitionProgress <= 0.25f) {
-        t = 1 - transitionProgress / 0.25f;
+    // if (transitionProgress <= 0.25f) {
+    //     t = 1 - transitionProgress / 0.25f;
 
-        indexRect.y += acceleration * t * t / 2;
-    }
+    //     indexRect.y += acceleration * t * t / 2;
+    // }
 
     if (transitionProgress <= 0.33f) {
         t = 1 - transitionProgress / 0.33f;
 
         winsRect.y += acceleration * t * t / 2;
+    }
+
+    if (transitionProgress > 0.33f && transitionProgress <= 0.66f) {
+        t = 1 - (transitionProgress - 0.33f) / 0.33f;
+
+        winrateRect.y += acceleration * t * t / 2;
     }
 }
 
@@ -318,13 +333,11 @@ void RankMenu::updateTransitionDefaultOut() {
 
     acceleration = 2.0f * (0.3f * boxW);
 
-    if (transitionProgress <= 0.25) {
-        t = (transitionProgress) / 0.25;
+    // if (transitionProgress <= 0.25) {
+    //     t = (transitionProgress) / 0.25;
 
-        indexRect.x += acceleration * t * t / 2;
-    }
-    else
-        indexRect.x += indexRect.w;
+    //     indexRect.x += acceleration * t * t / 2;
+    // }
 
 
     if (transitionProgress <= 0.33f) {
@@ -332,8 +345,13 @@ void RankMenu::updateTransitionDefaultOut() {
 
         winsRect.x += acceleration * t * t / 2;
     }
-    else
-        winsRect.x += winsRect.w;
+
+
+    if (transitionProgress > 0.33f && transitionProgress < 0.66f) {
+        t = (transitionProgress - 0.33f) / 0.33f;
+
+        winrateRect.x += acceleration * t * t / 2;
+    }
 }
 
 
@@ -415,6 +433,14 @@ void RankMenu::update(Screen &screen) {
     };
 
 
+    winrateRect = SDL_Rect {
+        borders.x + borders.w + 20,
+        winsRect.y + winsRect.h + 5,
+        static_cast<int>(otherFont * winrateText.size()),
+        static_cast<int>(2.4f * otherFont)
+    };
+
+
     auto previousState = transitionState;
     updateTransitionIn();
     updateTransitionOut();
@@ -457,12 +483,22 @@ void RankMenu::renderTransitionIn() {
         if (transitionProgress <= 0.33f) {
             SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress / 0.33f * 255));
         }
+
+        if (transitionProgress <= 0.33f) {
+            SDL_SetTextureAlphaMod(winrateTexture, 0);
+        }
+        else if (transitionProgress > 0.33f && transitionProgress <= 0.66f) {
+            SDL_SetTextureAlphaMod(winrateTexture, static_cast<int>((transitionProgress - 0.33f) / 0.33f * 255));
+        }
+
     }
     else {
         SDL_SetTextureAlphaMod(indexTexture, static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress * 255));
-    } 
-        
+        SDL_SetTextureAlphaMod(winrateTexture, static_cast<int>(transitionProgress * 255));
+    }
+
+
 }
 
 
@@ -491,11 +527,23 @@ void RankMenu::renderTransitionOut() {
         else {
             SDL_SetTextureAlphaMod(winsTexture, 0);
         }
+
+        if (transitionProgress <= 0.33f) {
+            SDL_SetTextureAlphaMod(winrateTexture, 255);
+        }
+        else if (transitionProgress > 0.33f && transitionProgress <= 0.66) {
+            SDL_SetTextureAlphaMod(winrateTexture, 255 - static_cast<int>((transitionProgress - 0.33f) / 0.33f * 255));
+        }
+        else {
+            SDL_SetTextureAlphaMod(winrateTexture, 0);
+        }
     }
     else {
         SDL_SetTextureAlphaMod(indexTexture, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress * 255));
+        SDL_SetTextureAlphaMod(winrateTexture, 255 - static_cast<int>(transitionProgress * 255));
     }
+
 }
 
 
@@ -529,6 +577,14 @@ void RankMenu::render(Screen& screen) {
         winsRect.w, 
         winsRect.h, 
         winsTexture
+    );
+
+    screen.putTexturedRect(
+        winrateRect.x, 
+        winrateRect.y, 
+        winrateRect.w, 
+        winrateRect.h, 
+        winrateTexture
     );
 
 
