@@ -42,6 +42,7 @@ void RankMenu::loadEntities(Screen& screen) {
     loadIndex(screen);
     loadWins(screen);
     loadWinrate(screen);
+    loadTotal(screen);
 }
 
 
@@ -85,7 +86,8 @@ void RankMenu::loadWinrate(Screen& screen) {
 
 
 void RankMenu::loadTotal(Screen& screen) {
-    loadLabel(screen, &totalTexture, "Total: " + std::to_string(pictures[index].total));
+    totalText = "Total: " + std::to_string(pictures[index].total);
+    loadLabel(screen, &totalTexture, totalText);
 }
 
 
@@ -275,6 +277,12 @@ void RankMenu::updateTransitionDefaultIn() {
 
         winrateRect.y += acceleration * t * t / 2;
     }
+
+    if (transitionProgress > 0.66f) {
+        t = 1 - (transitionProgress - 0.66f) / 0.33f;
+
+        totalRect.y += acceleration * t * t / 2;
+    }
 }
 
 
@@ -351,6 +359,12 @@ void RankMenu::updateTransitionDefaultOut() {
         t = (transitionProgress - 0.33f) / 0.33f;
 
         winrateRect.x += acceleration * t * t / 2;
+    }
+
+    if (transitionProgress > 0.66f) {
+        t = (transitionProgress - 0.66f) / 0.33f;
+
+        totalRect.x += acceleration * t * t / 2;
     }
 }
 
@@ -441,6 +455,14 @@ void RankMenu::update(Screen &screen) {
     };
 
 
+    totalRect = SDL_Rect {
+        borders.x + borders.w + 20,
+        winrateRect.y + winrateRect.h + 5,
+        static_cast<int>(otherFont * totalText.size()),
+        static_cast<int>(2.4f * otherFont)
+    };
+
+
     auto previousState = transitionState;
     updateTransitionIn();
     updateTransitionOut();
@@ -491,11 +513,19 @@ void RankMenu::renderTransitionIn() {
             SDL_SetTextureAlphaMod(winrateTexture, static_cast<int>((transitionProgress - 0.33f) / 0.33f * 255));
         }
 
+        if (transitionProgress <= 0.66f) {
+            SDL_SetTextureAlphaMod(totalTexture, 0);
+        }
+        else {
+            SDL_SetTextureAlphaMod(totalTexture, static_cast<int>((transitionProgress - 0.66f) / 0.33f * 255));
+        }
+
     }
     else {
         SDL_SetTextureAlphaMod(indexTexture, static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winrateTexture, static_cast<int>(transitionProgress * 255));
+        SDL_SetTextureAlphaMod(totalTexture, static_cast<int>(transitionProgress * 255));
     }
 
 
@@ -537,11 +567,19 @@ void RankMenu::renderTransitionOut() {
         else {
             SDL_SetTextureAlphaMod(winrateTexture, 0);
         }
+
+        if (transitionProgress <= 0.66f) {
+            SDL_SetTextureAlphaMod(totalTexture, 255);
+        }
+        else {
+            SDL_SetTextureAlphaMod(totalTexture, 255 - static_cast<int>((transitionProgress - 0.66f) / 0.33f * 255));
+        }
     }
     else {
         SDL_SetTextureAlphaMod(indexTexture, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winrateTexture, 255 - static_cast<int>(transitionProgress * 255));
+        SDL_SetTextureAlphaMod(totalTexture, 255 - static_cast<int>(transitionProgress * 255));
     }
 
 }
@@ -587,6 +625,13 @@ void RankMenu::render(Screen& screen) {
         winrateTexture
     );
 
+    screen.putTexturedRect(
+        totalRect.x, 
+        totalRect.y, 
+        totalRect.w, 
+        totalRect.h, 
+        totalTexture
+    );
 
     screen.putTexturedRect(
         pictureRect.x, 
