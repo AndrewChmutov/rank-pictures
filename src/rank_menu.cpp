@@ -248,9 +248,15 @@ void RankMenu::updateTransitionDefaultIn() {
 
     nameRect.y -= acceleration * t * t / 2;
 
+    acceleration = 2 * 0.2f * boxH;
+    if (transitionProgress <= 0.25f) {
+        t = 1 - transitionProgress / 0.25f;
+
+        indexRect.y += acceleration * t * t / 2;
+    }
+
     if (transitionProgress <= 0.33f) {
-        acceleration = 2.0f * (winsRect.h);
-        t = (0.33f - transitionProgress) / 0.33f;
+        t = 1 - transitionProgress / 0.33f;
 
         winsRect.y += acceleration * t * t / 2;
     }
@@ -310,12 +316,24 @@ void RankMenu::updateTransitionDefaultOut() {
 
     nameRect.y -= acceleration * t * t / 2;
 
+    acceleration = 2.0f * (0.3f * boxW);
+
+    if (transitionProgress <= 0.25) {
+        t = (transitionProgress) / 0.25;
+
+        indexRect.x += acceleration * t * t / 2;
+    }
+    else
+        indexRect.x += indexRect.w;
+
+
     if (transitionProgress <= 0.33f) {
-        acceleration = 2.0f * (winsRect.w);
         t = (transitionProgress) / 0.33f;
 
         winsRect.x += acceleration * t * t / 2;
     }
+    else
+        winsRect.x += winsRect.w;
 }
 
 
@@ -425,9 +443,26 @@ void RankMenu::renderTransitionIn() {
             transitionState != TransitionState::LEFT_IN &&
             transitionState != TransitionState::RIGHT_IN)
         return;
+    
+    if (transitionState != TransitionState::FADE_IN)
+        SDL_SetTextureAlphaMod(nameTexture, static_cast<int>(transitionProgress * 255));
 
     SDL_SetTextureAlphaMod(pictureTexture, static_cast<int>(transitionProgress * 255));
-    SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress * 255));
+
+    if (transitionState == TransitionState::FADE_IN) {
+        if (transitionProgress <= 0.25f) {
+            SDL_SetTextureAlphaMod(indexTexture, static_cast<int>((transitionProgress / 0.25f) * 255));
+        }
+
+        if (transitionProgress <= 0.33f) {
+            SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress / 0.33f * 255));
+        }
+    }
+    else {
+        SDL_SetTextureAlphaMod(indexTexture, static_cast<int>(transitionProgress * 255));
+        SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress * 255));
+    } 
+        
 }
 
 
@@ -437,8 +472,30 @@ void RankMenu::renderTransitionOut() {
             transitionState != TransitionState::RIGHT_OUT)
         return;
 
+    if (transitionState != TransitionState::FADE_OUT)
+        SDL_SetTextureAlphaMod(nameTexture, 255 - static_cast<int>(transitionProgress * 255));
+
     SDL_SetTextureAlphaMod(pictureTexture, 255 - static_cast<int>(transitionProgress * 255));
-    SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress * 255));
+
+    if (transitionState == TransitionState::FADE_OUT) {
+        if (transitionProgress <= 0.25f) {
+            SDL_SetTextureAlphaMod(indexTexture, 255 - static_cast<int>((transitionProgress / 0.25f) * 255));
+        }
+        else {
+            SDL_SetTextureAlphaMod(indexTexture, 0);
+        }
+
+        if (transitionProgress <= 0.33f) {
+            SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress / 0.33f * 255));
+        }
+        else {
+            SDL_SetTextureAlphaMod(winsTexture, 0);
+        }
+    }
+    else {
+        SDL_SetTextureAlphaMod(indexTexture, 255 - static_cast<int>(transitionProgress * 255));
+        SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress * 255));
+    }
 }
 
 
