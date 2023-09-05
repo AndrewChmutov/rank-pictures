@@ -1,56 +1,62 @@
 #pragma once
 
 // Custom libraries
-#include "menu_events.hpp"
 #include "screen.hpp"
+#include "menu_events.hpp"
 #include "base_menu.hpp"
 #include "picture_record.hpp"
 
 // C++ standard libraries
+#include <filesystem>
 #include <vector>
 #include <memory>
-#include <random>
 
+// Application class
+// The main features:
+// - Rank pictures
+// - View the results
 class Application {
     // Screen for showing pictures
     Screen screen;
 
-    // paths
+    // Pictures information
+    std::vector<PictureRecord> pictures;
     std::string pathToPictures;
+
+    // Font position
     std::string pathToFont;
 
-    // For main loop
+    // Flag for main loop
     bool isRunning;
 
-    // For handling menu logic 
+    // Handles menu logic of the app 
     std::unique_ptr<BaseMenu> currentMenu;
-    
-    // Random integer generation
-    // std::mt19937 gen;
-    // std::uniform_int_distribution<int> dist;
 
-    std::vector<PictureRecord> pictures;
 
-    int lastLeft, lastRight;
-
-    // Update menu
-    void update();
-
-    // Render
-    void render();
-
-    // Change view to main menu
+    // Change view to main menu:
+    // Compare pictures and count the choices
     void switchToMain();
 
-
+    // Change view to rank menu:
+    // See the counters and pictures in order
     void switchToRank(MenuEvent event);
 
-    // Debug information into ostream
-    void debug();
-public:
-    Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont);
+    // Update current menu
+    void update();
 
-    // Method for main loop of the application
+    // Render current menu
+    void render();
+
+    // Debug information into ostream
+    void debug() const;
+
+    // Checks if given directory entry is picture
+    bool isPicture(const std::filesystem::directory_entry& entry) const;
+public:
+    Application(std::size_t w, std::size_t h, const std::string& pathToPictures, 
+                    const std::string& pathToFont, std::string pathToBackground = "");
+
+    // Application main loop
     int run();
 
     ~Application();

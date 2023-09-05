@@ -1,31 +1,45 @@
 #include "application.hpp"
+
+// Custom libraries
+#include "screen.hpp"
 #include "menu_events.hpp"
 #include "main_menu.hpp"
-#include "picture_record.hpp"
 #include "rank_menu.hpp"
+#include "picture_record.hpp"
+
+// C++ standard libraries
 #include <filesystem>
-#include <random>
+#include <algorithm>
 #include <iostream>
 #include <string>
-#include <algorithm>
 #include <chrono>
 #include <thread>
 
-Application::Application(std::size_t w, std::size_t h, std::string pathToPictures, std::string pathToFont) :
-    // Setup a screen
-    screen(w, h, "Picture ranking"),
 
-    // Setup main paths
-    pathToPictures(pathToPictures),
-    pathToFont(pathToFont) {
+bool Application::isPicture(const std::filesystem::directory_entry& entry) const {
+    return (
+        entry.path().extension().string() == ".jpg" ||
+        entry.path().extension().string() == ".jpeg" ||
+        entry.path().extension().string() == ".png" ||
+        entry.path().extension().string() == ".bmp"
+    );
+}
+
+
+Application::Application(std::size_t w, std::size_t h, const std::string& pathToPictures, const std::string& pathToFont, std::string pathToBackground) :
+        // Setup a screen
+        screen(w, h, "Picture ranking"),
+
+        // Setup main paths
+        pathToPictures(pathToPictures),
+        pathToFont(pathToFont) {
     
-    // Get all the current pictures in the directory
+    // Get all the current pictures in the directory //
+
     pictures.clear();
     for(auto& entry : std::filesystem::directory_iterator(pathToPictures)) {
-        if (entry.path().extension().string() == ".jpg" ||
-                entry.path().extension().string() == ".jpeg" ||
-                entry.path().extension().string() == ".png" ||
-                entry.path().extension().string() == ".bmp") {
+        // If the picture is met - write the record
+        if (isPicture(entry)) {
             pictures.push_back(PictureRecord{
                 entry.path().filename().string(), 
                 0,
@@ -36,7 +50,9 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
 
     }
 
-    screen.setBackground("./background.png");
+    // Background 
+    if (pathToBackground != "")
+        screen.setBackground(pathToBackground);
 
     // Start from main menu
     switchToMain();
@@ -44,16 +60,25 @@ Application::Application(std::size_t w, std::size_t h, std::string pathToPicture
 
 
 int Application::run() {
+    // Flag for main loop
     isRunning = true;
+
+    // For establishing fps limit
     float desiredDelta = 1.0f / 60;
 
-
+    // Main loop
     while (isRunning) {
+        // Start timer
         auto start = std::chrono::high_resolution_clock::now();
+
+        // Main structure of the app
         update();
         render();
+
+        // Capture the time
         auto finish = std::chrono::high_resolution_clock::now();
-        
+
+        // Calculate the time to sleep
         std::chrono::duration<float> elapsed = finish - start;
         if (elapsed.count() < desiredDelta) {
             std::this_thread::sleep_for(std::chrono::duration<float>(desiredDelta - elapsed.count()));
@@ -62,6 +87,7 @@ int Application::run() {
 
     return 0;
 }
+
 
 void Application::update() {
     // Hangle SDL events
@@ -89,17 +115,19 @@ void Application::update() {
             break;
     }
 
-    // Update window and render
+    // Update window elements
     currentMenu.get()->update(screen);
 }
 
 
 void Application::render() {
+    // Render window elements
     currentMenu.get()->render(screen);
 }
 
 
 void Application::switchToMain() {
+    // Change view to Main menu
     currentMenu = std::make_unique<MainMenu>(
         screen,
         pictures,
@@ -109,12 +137,14 @@ void Application::switchToMain() {
 
 
 void Application::switchToRank(MenuEvent event) {
+    // Sort picture records
     std::sort(pictures.begin(), pictures.end(),
         [](const PictureRecord& first, const PictureRecord& second) {
             return first.wins > second.wins;
         }
     );
 
+    // Switch the view to Rank menu
     currentMenu = std::make_unique<RankMenu>(
         screen,
         pictures,
@@ -123,7 +153,8 @@ void Application::switchToRank(MenuEvent event) {
 }
 
 
-void Application::debug() {
+void Application::debug() const {
+    // Show information of each picture record
     for(auto& picture : pictures) {
         std::cout << "Name: " << picture.name << std::endl;
         std::cout << "Wins: " << picture.wins << std::endl;
