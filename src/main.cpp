@@ -10,10 +10,9 @@ int main() {
         1280,
         720,
         "test",
-        "fonts/MONOFONT.TTF"
+        "fonts/MONOFONT.TTF",
+        "./background.png"
     );
 
-
-    int result = app.run();
-    return result;
+    return app.run();
 }
