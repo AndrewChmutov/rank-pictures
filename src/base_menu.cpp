@@ -35,7 +35,7 @@ MenuEvent BaseMenu::handleEvents(Screen& screen) {
 
             // Handle specific event of the successor
             default:
-                return handleSpecificEvent(event, screen);
+                handleSpecificEvent(event, screen);
         }
     }
 
