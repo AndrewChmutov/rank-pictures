@@ -16,16 +16,6 @@
 #include <thread>
 
 
-bool Application::isPicture(const std::filesystem::directory_entry& entry) const {
-    return (
-        entry.path().extension().string() == ".jpg" ||
-        entry.path().extension().string() == ".jpeg" ||
-        entry.path().extension().string() == ".png" ||
-        entry.path().extension().string() == ".bmp"
-    );
-}
-
-
 Application::Application(std::size_t w, std::size_t h, const std::string& pathToPictures, const std::string& pathToFont, std::string pathToBackground) :
         // Setup a screen
         screen(w, h, "Picture ranking"),
@@ -89,6 +79,38 @@ int Application::run() {
 }
 
 
+Application::~Application() {
+    // debug();
+}
+
+
+void Application::switchToMain() {
+    // Change view to Main menu
+    currentMenu = std::make_unique<MainMenu>(
+        screen,
+        pictures,
+        pathToFont
+    );
+}
+
+
+void Application::switchToRank(MenuEvent event) {
+    // Sort picture records
+    std::sort(pictures.begin(), pictures.end(),
+        [](const PictureRecord& first, const PictureRecord& second) {
+            return first.wins > second.wins;
+        }
+    );
+
+    // Switch the view to Rank menu
+    currentMenu = std::make_unique<RankMenu>(
+        screen,
+        pictures,
+        pathToFont
+    );
+}
+
+
 void Application::update() {
     // Hangle SDL events
     MenuEvent event = currentMenu.get()->handleEvents(screen);
@@ -126,33 +148,6 @@ void Application::render() {
 }
 
 
-void Application::switchToMain() {
-    // Change view to Main menu
-    currentMenu = std::make_unique<MainMenu>(
-        screen,
-        pictures,
-        pathToFont
-    );
-}
-
-
-void Application::switchToRank(MenuEvent event) {
-    // Sort picture records
-    std::sort(pictures.begin(), pictures.end(),
-        [](const PictureRecord& first, const PictureRecord& second) {
-            return first.wins > second.wins;
-        }
-    );
-
-    // Switch the view to Rank menu
-    currentMenu = std::make_unique<RankMenu>(
-        screen,
-        pictures,
-        pathToFont
-    );
-}
-
-
 void Application::debug() const {
     // Show information of each picture record
     for(auto& picture : pictures) {
@@ -164,6 +159,11 @@ void Application::debug() const {
 }
 
 
-Application::~Application() {
-    // debug();
+bool Application::isPicture(const std::filesystem::directory_entry& entry) const {
+    return (
+        entry.path().extension().string() == ".jpg" ||
+        entry.path().extension().string() == ".jpeg" ||
+        entry.path().extension().string() == ".png" ||
+        entry.path().extension().string() == ".bmp"
+    );
 }
