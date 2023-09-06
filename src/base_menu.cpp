@@ -1,7 +1,8 @@
 #include "base_menu.hpp"
+
+// Custom libraries
 #include "menu_events.hpp"
 
-#include <iostream>
 MenuEvent BaseMenu::handleEvents(Screen& screen) {
     // Event type to get queue of events
     SDL_Event event;
