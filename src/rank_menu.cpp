@@ -5,14 +5,14 @@
 #include "picture_record.hpp"
 #include "transition_state.hpp"
 
-// SDL libraries
-#include <SDL2/SDL_image.h>
-#include <SDL_render.h>
-#include <SDL_surface.h>
-#include <SDL_ttf.h>
+// C++ standard libraries
 #include <iomanip>
 #include <string>
 #include <sstream>
+
+// SDL libraries
+#include <SDL2/SDL_image.h>
+#include <SDL_ttf.h>
 
 
 RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::string pathToFont) : 
@@ -30,8 +30,10 @@ RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
         totalTexture(nullptr),
         pictureTexture(nullptr) {
     
+    // Load all the information needed
     loadEntities(screen);
 
+    // Start the logic of the menu
     startTransitionIn(TransitionState::FADE_IN);
 }
 
@@ -52,6 +54,7 @@ void RankMenu::loadName(Screen& screen) {
 
 
 void RankMenu::loadPicture(Screen& screen) {
+    // if needed, free the pictures
     freeTexture(&pictureTexture);
 
     SDL_Surface* temp = IMG_Load(pictures[index].path.c_str());
@@ -472,11 +475,14 @@ void RankMenu::update(Screen &screen) {
 
 
 void RankMenu::updateInfo(Screen& screen, TransitionState previous) {
+    // If there is a necessity to change picture
     if (transitionState != TransitionState::CHANGE)
         return;
 
+    // Reload entities
     loadEntities(screen);
     
+    // Return back the state before CHANGE
     if (previous == TransitionState::LEFT_OUT)
         transitionState = TransitionState::LEFT_IN;
     else if (previous == TransitionState::RIGHT_OUT)
@@ -487,41 +493,52 @@ void RankMenu::updateInfo(Screen& screen, TransitionState previous) {
 
 
 void RankMenu::renderTransitionIn() {
+    // Enter the method if the conditions are met
     if (transitionState != TransitionState::FADE_IN && 
             transitionState != TransitionState::LEFT_IN &&
             transitionState != TransitionState::RIGHT_IN)
         return;
     
-    if (transitionState != TransitionState::FADE_IN)
-        SDL_SetTextureAlphaMod(nameTexture, static_cast<int>(transitionProgress * 255));
-
+    // Change the opacity of the picture
     SDL_SetTextureAlphaMod(pictureTexture, static_cast<int>(transitionProgress * 255));
 
     if (transitionState == TransitionState::FADE_IN) {
+        // If last transition in - order of fading
+
         if (transitionProgress <= 0.25f) {
+            // 0.0 - 0.25
             SDL_SetTextureAlphaMod(indexTexture, static_cast<int>((transitionProgress / 0.25f) * 255));
         }
 
         if (transitionProgress <= 0.33f) {
+            // 0.0 - 0.33
             SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress / 0.33f * 255));
         }
 
         if (transitionProgress <= 0.33f) {
+            // 0.0 - 0.33
+            // Transparent
             SDL_SetTextureAlphaMod(winrateTexture, 0);
         }
         else if (transitionProgress > 0.33f && transitionProgress <= 0.66f) {
+            // 0.34 - 0.66
             SDL_SetTextureAlphaMod(winrateTexture, static_cast<int>((transitionProgress - 0.33f) / 0.33f * 255));
         }
 
         if (transitionProgress <= 0.66f) {
+            // 0.0 - 0.66
+            // Transparent
             SDL_SetTextureAlphaMod(totalTexture, 0);
         }
         else {
+            // 0.67 - 1.0
             SDL_SetTextureAlphaMod(totalTexture, static_cast<int>((transitionProgress - 0.66f) / 0.33f * 255));
         }
 
     }
     else {
+        // If toLeft or toRight
+        SDL_SetTextureAlphaMod(nameTexture, static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(indexTexture, static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winsTexture, static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winrateTexture, static_cast<int>(transitionProgress * 255));
@@ -533,49 +550,66 @@ void RankMenu::renderTransitionIn() {
 
 
 void RankMenu::renderTransitionOut() {
+    // Enter the method if the conditions are met
     if (transitionState != TransitionState::FADE_OUT && 
             transitionState != TransitionState::LEFT_OUT &&
             transitionState != TransitionState::RIGHT_OUT)
         return;
 
-    if (transitionState != TransitionState::FADE_OUT)
-        SDL_SetTextureAlphaMod(nameTexture, 255 - static_cast<int>(transitionProgress * 255));
-
+    // Change opacity of the picture
     SDL_SetTextureAlphaMod(pictureTexture, 255 - static_cast<int>(transitionProgress * 255));
 
     if (transitionState == TransitionState::FADE_OUT) {
+        // If last fade out - order of fading
+
         if (transitionProgress <= 0.25f) {
+            // 0.0 - 0.25
             SDL_SetTextureAlphaMod(indexTexture, 255 - static_cast<int>((transitionProgress / 0.25f) * 255));
         }
         else {
+            // 0.26 - 1.0
+            // Transaprent
             SDL_SetTextureAlphaMod(indexTexture, 0);
         }
 
         if (transitionProgress <= 0.33f) {
+            // 0.0 - 0.33
             SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress / 0.33f * 255));
         }
         else {
+            // 0.34 - 1.0
+            // Transparent
             SDL_SetTextureAlphaMod(winsTexture, 0);
         }
 
         if (transitionProgress <= 0.33f) {
+            // 0.0 - 0.33
+            // Full opacity
             SDL_SetTextureAlphaMod(winrateTexture, 255);
         }
         else if (transitionProgress > 0.33f && transitionProgress <= 0.66) {
+            // 0.34 - 0.66
             SDL_SetTextureAlphaMod(winrateTexture, 255 - static_cast<int>((transitionProgress - 0.33f) / 0.33f * 255));
         }
         else {
+            // 0.67 - 1.0
+            // Transparent
             SDL_SetTextureAlphaMod(winrateTexture, 0);
         }
 
         if (transitionProgress <= 0.66f) {
+            //  0.0 - 0.66
+            // Full opacity
             SDL_SetTextureAlphaMod(totalTexture, 255);
         }
         else {
+            // 0.67 - 1.0
             SDL_SetTextureAlphaMod(totalTexture, 255 - static_cast<int>((transitionProgress - 0.66f) / 0.33f * 255));
         }
     }
     else {
+        // If toLeft or toRight
+        SDL_SetTextureAlphaMod(nameTexture, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(indexTexture, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winsTexture, 255 - static_cast<int>(transitionProgress * 255));
         SDL_SetTextureAlphaMod(winrateTexture, 255 - static_cast<int>(transitionProgress * 255));
@@ -586,11 +620,16 @@ void RankMenu::renderTransitionOut() {
 
 
 void RankMenu::render(Screen& screen) {
+    // Put blank or textured background
     screen.putBackground();
 
+    // Handle transitions
     renderTransitionIn();
     renderTransitionOut();
 
+    // Render main entities //
+
+    // Name label
     screen.putTexturedRect(
         nameRect.x,
         nameRect.y,
@@ -599,7 +638,7 @@ void RankMenu::render(Screen& screen) {
         nameTexture
     );
 
-
+    // Index
     screen.putTexturedRect(
         indexRect.x,
         indexRect.y,
@@ -608,7 +647,7 @@ void RankMenu::render(Screen& screen) {
         indexTexture
     );
 
-
+    // Wins
     screen.putTexturedRect(
         winsRect.x, 
         winsRect.y, 
@@ -617,6 +656,7 @@ void RankMenu::render(Screen& screen) {
         winsTexture
     );
 
+    // Winrate
     screen.putTexturedRect(
         winrateRect.x, 
         winrateRect.y, 
@@ -625,6 +665,7 @@ void RankMenu::render(Screen& screen) {
         winrateTexture
     );
 
+    // Total rounds
     screen.putTexturedRect(
         totalRect.x, 
         totalRect.y, 
@@ -633,6 +674,7 @@ void RankMenu::render(Screen& screen) {
         totalTexture
     );
 
+    // Picture
     screen.putTexturedRect(
         pictureRect.x, 
         pictureRect.y, 
@@ -641,6 +683,7 @@ void RankMenu::render(Screen& screen) {
         pictureTexture
     );
 
+    // Borders of picture
     screen.putRect(
         borders.x,
         borders.y,
@@ -649,11 +692,12 @@ void RankMenu::render(Screen& screen) {
         128, 128, 128
     );
 
-
+    // Show changes on screen
     screen.show();
 }
 
 
 RankMenu::~RankMenu() {
+    // Free all entities
     freeEntities();
 }
