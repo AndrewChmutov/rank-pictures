@@ -137,11 +137,12 @@ void Screen::putRect(int x1, int y1, int x2, int y2,
 
 
 Screen::~Screen() {
+    if (background)
+        SDL_DestroyTexture(background);
+    
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
-    if (background)
-        SDL_DestroyTexture(background);
 
     IMG_Quit();
     TTF_Quit();
