@@ -5,8 +5,11 @@ You choose the folder for pictures, and then the application proceed to Main men
 
 The project is made basing on library SDL. All animations, transitions, communication between menus: everything made from scratch. TO-DO: statistic is read and saved to the json file in the folder where pictures are stored.
 
+## Showcase
+[sample.webm](https://github.com/AndrewChmutov/rank-pictures/assets/67659210/0212ae7f-d04e-46b5-ba56-99bec8e3a6e6)
 
 ## Install
+
 First, you have to clone the repository:
 ```
 git clone https://github.com/AndrewChmutov/rank-pictures
