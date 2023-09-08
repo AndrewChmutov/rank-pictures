@@ -85,23 +85,13 @@ class RankMenu : public BaseMenu {
 
     // Transitions //
 
-    // Starts transition in
+    // Starts transition
     // Changes transition state
-    void startTransitionIn(TransitionState state);  
-
-    // Starts transition out
-    // Changes transtion state
-    void startTransitionOut(TransitionState state);
+    void startTransition(TransitionState state, float delta = 0.05f);  
 
     // Starts transition to left
     // - Sets the parameters for transition
-    // - Makes sure if index >= 0
-    void startTransitionLeftIn();
-
-    // Starts transition to right
-    // - Sets the parameters for transition
-    // - Makes sure if index < size of vector of pictures
-    void startTransitionRightIn();
+    void startTransitionLeftRightIn();
 
     // Updates positions for transition in
     void updateTransitionIn();
@@ -125,10 +115,12 @@ class RankMenu : public BaseMenu {
     void renderTransitionOut();
 
     // Starts transition to left picture
+    // Makes sure index >= 0
     // Changes transition state
     void toLeft();
 
     // Starts transition to right picture
+    // Makesu sure index < size
     // Changes transition state
     void toRight();
 

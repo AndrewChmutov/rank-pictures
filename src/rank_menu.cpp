@@ -34,7 +34,7 @@ RankMenu::RankMenu(Screen& screen, std::vector<PictureRecord>& pictures, std::st
     loadEntities(screen);
 
     // Start the logic of the menu
-    startTransitionIn(TransitionState::FADE_IN);
+    startTransition(TransitionState::FADE_IN);
 }
 
 
@@ -75,6 +75,7 @@ void RankMenu::loadWins(Screen& screen) {
 }
 
 void RankMenu::loadWinrate(Screen& screen) {
+    // Calculating winrate
     float winrate;
     if (pictures[index].total == 0)
         winrate = 0;
@@ -95,8 +96,10 @@ void RankMenu::loadTotal(Screen& screen) {
 
 
 void RankMenu::loadLabel(Screen& screen, SDL_Texture** tempTexture, const std::string& toShow) {
+    // free label if needed
     freeTexture(tempTexture);
 
+    // Take the font
     TTF_Font* font = TTF_OpenFont(pathToFont.c_str(), 50);
 
     SDL_Surface* temp = TTF_RenderText_Blended(
@@ -114,6 +117,8 @@ void RankMenu::loadLabel(Screen& screen, SDL_Texture** tempTexture, const std::s
 void RankMenu::freeTexture(SDL_Texture** texture) {
     if (*texture)
         SDL_DestroyTexture(*texture);
+
+    *texture = nullptr;
 }
 
 
@@ -140,7 +145,7 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE &&
                     transitionState == TransitionState::NONE) {
                 toReturn = MenuEvent::TO_MAIN_SCREEN;
-                startTransitionOut(TransitionState::FADE_OUT);
+                startTransition(TransitionState::FADE_OUT);
             }
             else if (event.key.keysym.scancode == SDL_SCANCODE_LEFT &&
                     transitionState == TransitionState::NONE) {
@@ -158,80 +163,62 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
 
 
 void RankMenu::toLeft() {
+    // No way to move left:
+    // The best picture is displayed
+    // according to ranking
     if (index <= 0) {
         index = 0;
         return;
     }
 
-    transitionState = TransitionState::LEFT_OUT;
-    transitionProgress = 0.0f;
-    delta = 0.05f;
-    
-    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+    // Safety measure
+    index = std::max(0, index - 1);
+
+    startTransition(TransitionState::LEFT_OUT);
 }
 
 
 void RankMenu::toRight() {
+    // No way to move right:
+    // The worst picture is displayed
+    // according to ranking
     if (index >= pictures.size() - 1) {
         index = pictures.size() - 1;
         return;
     }
 
-    transitionState = TransitionState::RIGHT_OUT;
-    transitionProgress = 0.0f;
-    delta = 0.05f;
-
-    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
-}
-
-
-void RankMenu::startTransitionIn(TransitionState state) {
-    transitionState = state;
-    transitionProgress = 0.0f;
-    delta = 0.05f;
-
-    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
-}
-
-
-void RankMenu::startTransitionOut(TransitionState state) {
-    transitionState = state;
-    transitionProgress = 0.0f;
-    delta = 0.03f;
-
-    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
-}
-
-
-void RankMenu::startTransitionLeftIn() {
-    transitionState = TransitionState::CHANGE;
-    transitionProgress = 0.0f;
-    delta = 0.05f;
-
-    index = std::max(0, index - 1);
-
-    SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
-}
-
-
-
-void RankMenu::startTransitionRightIn() {
-    transitionState = TransitionState::CHANGE;
-    transitionProgress = 0.0f;
-    delta = 0.05f;
-
+    // Safety measure
     index = std::min(static_cast<int>(pictures.size() - 1), index + 1);
 
+    // Setup transition
+    startTransition(TransitionState::RIGHT_OUT);
+}
+
+
+void RankMenu::startTransition(TransitionState state, float delta) {
+    // Setup parameters
+    transitionState = state;
+    transitionProgress = 0.0f;
+    this->delta = delta;
+
     SDL_SetTextureBlendMode(pictureTexture, SDL_BLENDMODE_BLEND);
+}
+
+
+void RankMenu::startTransitionLeftRightIn() {
+    // Flag to change (update) the information
+    startTransition(TransitionState::CHANGE);
 }
 
 
 void RankMenu::updateTransitionIn() {
+    // Enter the methods if the confitions are met
     if (transitionState != TransitionState::FADE_IN && 
             transitionState != TransitionState::LEFT_IN &&
             transitionState != TransitionState::RIGHT_IN)
         return;
 
+    // Specific transitions
     if (transitionState == TransitionState::LEFT_IN) {
         updateTransitionLeftIn();
     }
@@ -241,9 +228,11 @@ void RankMenu::updateTransitionIn() {
     else
         updateTransitionDefaultIn();  
 
+    // Progress
     transitionProgress += delta;
 
     if (transitionProgress >= 1.0f) {
+        // End of transition
         transitionState = TransitionState::NONE;
         transitionProgress = 1.0f;
 
@@ -253,35 +242,36 @@ void RankMenu::updateTransitionIn() {
 
 
 void RankMenu::updateTransitionDefaultIn() {
+    // Picture and borders
     float acceleration = 2.0f * 1.25f * boxH, t = 1.0f - transitionProgress;
 
     pictureRect.y   += acceleration * t * t / 2;
     borders.y       += acceleration * t * t / 2;
 
+    // Name label
     acceleration = 2.0f * (20 + nameRect.h);
 
     nameRect.y -= acceleration * t * t / 2;
 
+    // All other labels //
     acceleration = 2 * 0.2f * boxH;
-    // if (transitionProgress <= 0.25f) {
-    //     t = 1 - transitionProgress / 0.25f;
-
-    //     indexRect.y += acceleration * t * t / 2;
-    // }
 
     if (transitionProgress <= 0.33f) {
+        // Wins
         t = 1 - transitionProgress / 0.33f;
 
         winsRect.y += acceleration * t * t / 2;
     }
 
     if (transitionProgress > 0.33f && transitionProgress <= 0.66f) {
+        // Winrate
         t = 1 - (transitionProgress - 0.33f) / 0.33f;
 
         winrateRect.y += acceleration * t * t / 2;
     }
 
     if (transitionProgress > 0.66f) {
+        // Total
         t = 1 - (transitionProgress - 0.66f) / 0.33f;
 
         totalRect.y += acceleration * t * t / 2;
@@ -290,24 +280,30 @@ void RankMenu::updateTransitionDefaultIn() {
 
 
 void RankMenu::updateTransitionLeftIn() {
+    // Move only picture
     float acceleration = 2.0f * 1.5f * boxW, t = 1 - transitionProgress;
+
     pictureRect.x   -= acceleration * t * t / 2;
     borders.x       -= acceleration * t * t / 2;
 }
 
 void RankMenu::updateTransitionRightIn() {
+    // Move only picture
     float acceleration = 2.0f * 2.5f * boxW, t = 1 - transitionProgress;
+
     pictureRect.x   += acceleration * t * t / 2;
     borders.x       += acceleration * t * t / 2;
 }
 
 
 void RankMenu::updateTransitionOut() {
+    // Enter the method if the conditions are met
     if (transitionState != TransitionState::FADE_OUT && 
             transitionState != TransitionState::LEFT_OUT &&
             transitionState != TransitionState::RIGHT_OUT)
         return;
 
+    // Specific transition
     if (transitionState == TransitionState::LEFT_OUT) {
         updateTransitionLeftOut();
     }
@@ -317,15 +313,17 @@ void RankMenu::updateTransitionOut() {
     else
         updateTransitionDefaultOut();
 
+    // Progress
     transitionProgress += delta;
 
     if (transitionProgress >= 1.0f) {
+        // End of transition 
         transitionProgress = 1.0f;
 
         if (transitionState == TransitionState::LEFT_OUT)
-            startTransitionLeftIn();
+            startTransitionLeftRightIn();
         else if (transitionState == TransitionState::RIGHT_OUT)
-            startTransitionRightIn();
+            startTransitionLeftRightIn();
         else
             transitionState = TransitionState::END;
     }
@@ -333,38 +331,37 @@ void RankMenu::updateTransitionOut() {
 
 
 void RankMenu::updateTransitionDefaultOut() {
+    // Picture
     float acceleration = 2.0f * 1.5 * boxW, t = transitionProgress;
 
     pictureRect.x   -= acceleration * t * t / 2;
     borders.x       -= acceleration * t * t / 2;
 
+    // Name label
     acceleration = 2.0f * (10 + nameRect.h);
 
     nameRect.y -= acceleration * t * t / 2;
 
+    // All other labels //
+
     acceleration = 2.0f * (0.3f * boxW);
 
-    // if (transitionProgress <= 0.25) {
-    //     t = (transitionProgress) / 0.25;
-
-    //     indexRect.x += acceleration * t * t / 2;
-    // }
-
-
     if (transitionProgress <= 0.33f) {
+        // Wins
         t = (transitionProgress) / 0.33f;
 
         winsRect.x += acceleration * t * t / 2;
     }
 
-
     if (transitionProgress > 0.33f && transitionProgress < 0.66f) {
+        // Winrate
         t = (transitionProgress - 0.33f) / 0.33f;
 
         winrateRect.x += acceleration * t * t / 2;
     }
 
     if (transitionProgress > 0.66f) {
+        // Total
         t = (transitionProgress - 0.66f) / 0.33f;
 
         totalRect.x += acceleration * t * t / 2;
@@ -373,6 +370,7 @@ void RankMenu::updateTransitionDefaultOut() {
 
 
 void RankMenu::updateTransitionLeftOut() {
+    // Move only picture
     float acceleration = 2.0f * 3.0f * boxW, t = transitionProgress;
     pictureRect.x   += acceleration * t * t / 2;
     borders.x       += acceleration * t * t / 2;
@@ -380,6 +378,7 @@ void RankMenu::updateTransitionLeftOut() {
 
 
 void RankMenu::updateTransitionRightOut() {
+    // Move only picture
     float acceleration = 2.0f * 2.0f * boxW, t = transitionProgress;
     pictureRect.x   -= acceleration * t * t / 2;
     borders.x       -= acceleration * t * t / 2;
@@ -387,22 +386,25 @@ void RankMenu::updateTransitionRightOut() {
 
 
 void RankMenu::update(Screen &screen) {
+    // Update the information about the window
     int windowX, windowY;
     screen.getSize(windowX, windowY);
+    boxW = static_cast<int>(500.0f / 1280 * windowX); 
+    boxH = static_cast<int>(500.0f / 720 * windowY);
 
+    // Name label
     nameRect.y = 10;
     nameRect.w = nameFont * pictures[index].name.size();
     nameRect.h = static_cast<int>(2.4 * nameFont);
     nameRect.x = windowX / 2 - nameRect.w / 2;
     
-    
-    boxW = static_cast<int>(500.0f / 1280 * windowX); 
-    boxH = static_cast<int>(500.0f / 720 * windowY);
+    // Picture //
 
-    int imgX, imgY;
-    SDL_QueryTexture(pictureTexture, NULL, NULL, &imgX, &imgY);
+    // Size of picture
+    int imgWW, imgH;
+    SDL_QueryTexture(pictureTexture, NULL, NULL, &imgWW, &imgH);
     
-    float ratio = 1.0f * imgX / imgY;
+    float ratio = 1.0f * imgWW / imgH;
     float ratioBox = 1.0f * boxW / boxH;
 
 
@@ -412,7 +414,7 @@ void RankMenu::update(Screen &screen) {
         // by ratio formula
         pictureRect.h = 1.0f * boxW / ratio;
 
-        pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * boxW * (displacement - 0.5f) - pictureRect.w / 2);
+        pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * boxW * (displacement - 0.5f) - 1.0f * pictureRect.w / 2);
         pictureRect.y = windowY / 2 - pictureRect.h / 2;
     }
     else {
@@ -421,11 +423,12 @@ void RankMenu::update(Screen &screen) {
         // by ratio formula
         pictureRect.w = ratio * boxH;
 
-        pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * boxW * (displacement - 0.5f) - pictureRect.w / 2);
+        pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * boxW * (displacement - 0.5f) - 1.0f * pictureRect.w / 2);
         // pictureRect.x = static_cast<int>(1.0f * windowX / 2 - 1.0f * pictureRect.w * 3 / 4);
         pictureRect.y = windowY / 2 - pictureRect.h / 2;
     }
 
+    // Borders position
     borders = SDL_Rect{
         static_cast<int>(1.0f * windowX/2 - 1.0f * boxW * displacement),
         windowY / 2 - boxH / 2,
@@ -433,7 +436,7 @@ void RankMenu::update(Screen &screen) {
         boxH
     };
 
-
+    // Index position
     indexRect = SDL_Rect {
         borders.x + borders.w + 20,
         borders.y,
@@ -441,7 +444,7 @@ void RankMenu::update(Screen &screen) {
         static_cast<int>(2.4f * nameFont)
     };
 
-    
+    // Wins position
     winsRect = SDL_Rect {
         borders.x + borders.w + 20,
         indexRect.y + indexRect.h + 5,
@@ -449,7 +452,7 @@ void RankMenu::update(Screen &screen) {
         static_cast<int>(2.4f * otherFont)
     };
 
-
+    // Winrate position
     winrateRect = SDL_Rect {
         borders.x + borders.w + 20,
         winsRect.y + winsRect.h + 5,
@@ -457,7 +460,7 @@ void RankMenu::update(Screen &screen) {
         static_cast<int>(2.4f * otherFont)
     };
 
-
+    // Total position
     totalRect = SDL_Rect {
         borders.x + borders.w + 20,
         winrateRect.y + winrateRect.h + 5,
@@ -465,11 +468,15 @@ void RankMenu::update(Screen &screen) {
         static_cast<int>(2.4f * otherFont)
     };
 
-
+    // In case of changes
     auto previousState = transitionState;
+
+    // Transitions
     updateTransitionIn();
     updateTransitionOut();
 
+    // If current state is CHANGE, then
+    // update info
     updateInfo(screen, previousState);
 }
 
