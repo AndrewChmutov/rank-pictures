@@ -5,6 +5,7 @@
 #include "menu_events.hpp"
 #include "base_menu.hpp"
 #include "picture_record.hpp"
+#include "data_handler.hpp"
 
 // C++ standard libraries
 #include <filesystem>
@@ -18,6 +19,7 @@
 class Application {
     // Screen for showing pictures
     Screen screen;
+    DataHandler dataHandler;
 
     // Pictures information
     std::vector<PictureRecord> pictures;

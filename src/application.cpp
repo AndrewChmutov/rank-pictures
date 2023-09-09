@@ -22,7 +22,8 @@ Application::Application(std::size_t w, std::size_t h, const std::string& pathTo
 
         // Setup main paths
         pathToPictures(pathToPictures),
-        pathToFont(pathToFont) {
+        pathToFont(pathToFont),
+        dataHandler(pathToPictures) {
     
     // Get all the current pictures in the directory //
 
@@ -39,6 +40,8 @@ Application::Application(std::size_t w, std::size_t h, const std::string& pathTo
         }
 
     }
+
+    dataHandler.getData(pictures);
 
     // Background 
     if (pathToBackground != "")
@@ -81,6 +84,7 @@ int Application::run() {
 
 Application::~Application() {
     // debug();
+    dataHandler.updateData(pictures);
 }
 
 

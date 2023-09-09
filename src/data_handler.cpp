@@ -1,5 +1,9 @@
 #include "data_handler.hpp"
 
+DataHandler::DataHandler(std::string path) {
+    this->path = path;
+}
+
 void DataHandler::getData(std::vector<PictureRecord> &pictures) const {
 
 }

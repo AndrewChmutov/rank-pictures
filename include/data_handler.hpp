@@ -9,10 +9,10 @@
 #include <vector>
 
 class DataHandler {
-    std::string name;
+    std::string path;
 
 public:
-    DataHandler(std::string name);
+    DataHandler(std::string path);
 
     void getData(std::vector<PictureRecord>& pictures) const;
 
