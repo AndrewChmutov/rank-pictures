@@ -15,11 +15,17 @@ First things first, the required libraries:
 - SDL2
 - SDL images subsystem
 - SDL fonts subsystem
+- nlohmann/json - single include
 
 To download them on Debian-based linux distributions, the command is following:
 ```
 sudo apt install libsdl1.2-dev libsdl2-image-dev libsdl2-ttf-dev
 ```
+
+Library that is already included in this repository is the following:
+https://github.com/nlohmann/json
+
+Huge thanks to Niels Lohmann!
 
 
 ### Repository
