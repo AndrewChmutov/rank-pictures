@@ -11,6 +11,7 @@ find_package(SDL2_ttf REQUIRED)
 include_directories(rank
     ${SDL2_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/third-party/nlohmann
     ${SDL2IMAGE_INCLUDE_DIRS}
     ${SDL2TTF_INCLUDE_DIRS}
 )
