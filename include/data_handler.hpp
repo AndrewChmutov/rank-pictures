@@ -8,8 +8,14 @@
 #include <fstream>
 #include <vector>
 
+// Library for JSON handling
+#include "json.hpp"
+
 class DataHandler {
     std::string path;
+
+    int getItemInt(nlohmann::json& data, std::string&& itemName) const;
+    void setItem(nlohmann::json& data, std::string&& itemName, auto value) const;
 
 public:
     DataHandler(std::string path);
