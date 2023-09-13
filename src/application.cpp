@@ -120,7 +120,7 @@ void Application::switchToRank(MenuEvent event) {
 
 void Application::handleEvents() {
     // Hangle SDL events
-    MenuEvent event = currentMenu.get()->handleEvents(screen);
+    MenuEvent event = currentMenu->handleEvents(screen);
 
     // Communication between menu and app
     switch (event) {
@@ -148,13 +148,13 @@ void Application::handleEvents() {
 
 void Application::update() {
     // Update window elements
-    currentMenu.get()->update(screen);
+    currentMenu->update(screen);
 }
 
 
 void Application::render() {
     // Render window elements
-    currentMenu.get()->render(screen);
+    currentMenu->render(screen);
 }
 
 
