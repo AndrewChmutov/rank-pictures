@@ -132,6 +132,8 @@ public:
 
     virtual MenuEvent handleEvents(Screen& screen) override;
 
+    virtual bool toUpdate() override;
+
     // Update menu
     virtual void update(Screen& screen) override;
 

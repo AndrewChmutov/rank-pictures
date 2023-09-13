@@ -162,6 +162,11 @@ MenuEvent RankMenu::handleSpecificEvent(const SDL_Event &event, Screen &screen) 
 }
 
 
+bool RankMenu::toUpdate() {
+    return transitionState != TransitionState::NONE;
+}
+
+
 void RankMenu::toLeft() {
     // No way to move left:
     // The best picture is displayed
