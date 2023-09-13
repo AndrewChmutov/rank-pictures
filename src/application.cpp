@@ -65,8 +65,11 @@ int Application::run() {
         auto start = std::chrono::high_resolution_clock::now();
 
         // Main structure of the app
-        update();
-        render();
+        handleEvents();
+        if (currentMenu->toUpdate()) {
+            update();
+            render();
+        }
 
         // Capture the time
         auto finish = std::chrono::high_resolution_clock::now();
@@ -115,7 +118,7 @@ void Application::switchToRank(MenuEvent event) {
 }
 
 
-void Application::update() {
+void Application::handleEvents() {
     // Hangle SDL events
     MenuEvent event = currentMenu.get()->handleEvents(screen);
 
@@ -140,7 +143,10 @@ void Application::update() {
         case MenuEvent::NONE:
             break;
     }
+}
 
+
+void Application::update() {
     // Update window elements
     currentMenu.get()->update(screen);
 }

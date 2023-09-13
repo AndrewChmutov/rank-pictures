@@ -116,6 +116,11 @@ MenuEvent MainMenu::handleSpecificEvent(const SDL_Event& event, Screen& screen) 
 }
 
 
+bool MainMenu::toUpdate() {
+    return transitionState != TransitionState::NONE;
+}
+
+
 void MainMenu::getRandomDouble(Screen& screen) {
     // Randomly choose 2 picture indexes //
 

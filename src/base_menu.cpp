@@ -43,6 +43,8 @@ MenuEvent BaseMenu::handleEvents(Screen& screen) {
     return MenuEvent::NONE;
 }
 
+bool BaseMenu::toUpdate() { return true; }
+
 void BaseMenu::update(Screen& screen) {}
 
 void BaseMenu::render(Screen& screen) {}

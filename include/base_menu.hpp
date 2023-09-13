@@ -17,6 +17,9 @@ public:
     // - Maximize
     virtual MenuEvent handleEvents(Screen& screen);
 
+    // Give the information whether an application should update and render the frame
+    virtual bool toUpdate();
+
     // Update menu
     virtual void update(Screen& screen);
 

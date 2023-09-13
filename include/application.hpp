@@ -43,6 +43,9 @@ class Application {
     // See the counters and pictures in order
     void switchToRank(MenuEvent event);
 
+
+    void handleEvents();
+
     // Update current menu
     void update();
 

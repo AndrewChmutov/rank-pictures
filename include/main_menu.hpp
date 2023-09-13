@@ -148,6 +148,9 @@ public:
     // after update
     virtual MenuEvent handleEvents(Screen& screen) override;
 
+    // Flag if the application has to update and render the menu
+    virtual bool toUpdate() override;
+
     // Update changes of the menu
     virtual void update(Screen& screen) override;
 
